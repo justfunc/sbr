@@ -260,8 +260,8 @@ jobs:
           done
 
           # Mac
-          darwin_old_name=(amd64-v1 amd64-v3 arm64 )
-          darwin_new_name=(amd64v1 amd64v3 armv8 )
+          darwin_old_name=(amd64 arm64)
+          darwin_new_name=(amd64 arm64)
           for i in "${!darwin_old_name[@]}"; do
             mv -f "./tmp-ref1nd/sing-box-ref1nd-main-darwin-${darwin_old_name[i]}/sing-box" ./tmp-ref1nd/CrashCore
             chmod +x ./tmp-ref1nd/CrashCore
