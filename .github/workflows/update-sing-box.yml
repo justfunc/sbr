@@ -310,13 +310,13 @@ jobs:
             echo "singbox_exist=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Release and upload `sing-box` assets
+      - name: Release and upload `sing-box-reF1nd` assets
         if: ${{ steps.check.outputs.singbox_exist == 'true' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: sing-box
-          tag: sing-box
+          release_name: sing-box-reF1nd
+          tag: sing-box-reF1nd
           overwrite: true
           body: |
             更新 [sing-box reF1nd-main 版](https://github.com/reF1nd/sing-box/tree/reF1nd-main)至 v${{ env.ref1nd_main_VERSION }}，发布于 ${{ env.ref1nd_main_TIME }}
