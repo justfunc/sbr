@@ -81,7 +81,8 @@ jobs:
           - { name: windows-amd64-v3, goos: windows, goarch: amd64, goamd64: v3 }
           - { name: windows-arm64, goos: windows, goarch: arm64 }
           # mac
-          - { name: macos-arm64, goos: darwin, goarch: arm64 }
+          - { name: mac-arm64, goos: darwin, goarch: arm64 }
+          - { name: mac-amd64, goos: darwin, goarch: amd64 }
 
       fail-fast: false
     needs:
@@ -178,7 +179,8 @@ jobs:
           - { name: windows-amd64-v3, goos: windows, goarch: amd64, goamd64: v3 }
           - { name: windows-arm64, goos: windows, goarch: arm64 }
           # mac
-          - { name: macos-arm64, goos: darwin, goarch: arm64 }
+          - { name: mac-arm64, goos: darwin, goarch: arm64 }
+          - { name: mac-amd64, goos: darwin, goarch: amd64 }
 
       fail-fast: false
     needs:
@@ -242,8 +244,8 @@ jobs:
         run: |
           # Linux
           mkdir -p ./tmp-ref1nd/ ./sing-box/
-          linux_old_name=(amd64-v1 amd64-v3 armv5 armv6 armv7 arm64 mips-softfloat mipsle-softfloat mipsle-hardfloat)
-          linux_new_name=(amd64v1 amd64v3 armv5 armv6 armv7 armv8 mips-softfloat mipsle-softfloat mipsle-hardfloat)
+          linux_old_name=(amd64-v1 amd64-v3 arm64 )
+          linux_new_name=(amd64v1 amd64v3 armv8 )
           for i in "${!linux_old_name[@]}"; do
             mv -f "./tmp-ref1nd/sing-box-ref1nd-main-linux-${linux_old_name[i]}/sing-box" ./tmp-ref1nd/CrashCore
             chmod +x ./tmp-ref1nd/CrashCore
@@ -262,8 +264,8 @@ jobs:
         run: |
           # Linux
           mkdir -p ./tmp-ref1nd/ ./sing-box/
-          linux_old_name=(amd64-v1 amd64-v3 armv5 armv6 armv7 arm64 mips-softfloat mipsle-softfloat mipsle-hardfloat)
-          linux_new_name=(amd64v1 amd64v3 armv5 armv6 armv7 armv8 mips-softfloat mipsle-softfloat mipsle-hardfloat)
+          linux_old_name=(amd64-v1 amd64-v3 arm64)
+          linux_new_name=(amd64v1 amd64v3 armv8)
           for i in "${!linux_old_name[@]}"; do
             mv -f "./tmp-ref1nd/sing-box-ref1nd-dev-linux-${linux_old_name[i]}/sing-box" ./tmp-ref1nd/CrashCore
             chmod +x ./tmp-ref1nd/CrashCore
@@ -276,6 +278,16 @@ jobs:
           for i in "${!windows_old_name[@]}"; do
             mv -f "./tmp-ref1nd/sing-box-ref1nd-dev-windows-${windows_old_name[i]}/sing-box.exe" "./sing-box/sing-box-ref1nd-dev-windows-${windows_new_name[i]}.exe"
           done
+
+          # Mac
+          mac_old_name=(arm64 amd64)
+          mac_new_name=(arm64 amd64)
+          for i in "${!mac_old_name[@]}"; do
+            mv -f "./tmp-ref1nd/sing-box-ref1nd-dev-mac-${mac_old_name[i]}/sing-box" ./tmp-ref1nd/CrashCore
+            chmod +x ./tmp-ref1nd/CrashCore
+            tar --no-same-owner -czf "./sing-box/sing-box-ref1nd-dev-mac-${mac_new_name[i]}.tar.gz" -C ./tmp-ref1nd/ CrashCore
+          done
+          
           rm -rf ./tmp-ref1nd*
 
       - name: Set variables
@@ -313,8 +325,8 @@ jobs:
         run: |
           # Linux
           mkdir -p ./sing-box/
-          linux_old_name=(amd64 armv5 armv6 armv7 arm64 mips-softfloat mipsle-softfloat mipsle)
-          linux_new_name=(amd64 armv5 armv6 armv7 armv8 mips-softfloat mipsle-softfloat mipsle-hardfloat)
+          linux_old_name=(amd64 arm64)
+          linux_new_name=(amd64 armv8)
           for i in "${!linux_old_name[@]}"; do
             mkdir -p "./tmp-release/release_linux_${linux_old_name[i]}"
             curl -L "${download_url}/${release_version}/sing-box-${release_version#v}-linux-${linux_old_name[i]}.tar.gz" | tar -zx -C "./tmp-release/release_linux_${linux_old_name[i]}/"
@@ -331,6 +343,17 @@ jobs:
             unzip -o "./tmp-release/release_windows_${arch}/sing-box-${release_version#v}-windows-${arch}.zip" -d "./tmp-release/release_windows_${arch}/"
             mv -f "./tmp-release/release_windows_${arch}/sing-box-${release_version#v}-windows-${arch}/sing-box.exe" "./sing-box/sing-box-release-windows-${arch}.exe"
           done
+
+          # Mac
+          mac_old_name=(arm64 amd64)
+          mac_new_name=(arm64 amd64)
+          for i in "${!mac_old_name[@]}"; do
+            mkdir -p "./tmp-release/release_mac_${mac_old_name[i]}"
+            curl -L "${download_url}/${release_version}/sing-box-${release_version#v}-mac-${mac_old_name[i]}.tar.gz" | tar -zx -C "./tmp-release/release_mac_${mac_old_name[i]}/"
+            mv -f "./tmp-release/release_mac_${mac_old_name[i]}/sing-box-${release_version#v}-mac-${mac_old_name[i]}/sing-box" ./tmp-release/CrashCore
+            chmod +x ./tmp-release/CrashCore
+            tar --no-same-owner -czf "./sing-box/sing-box-release-mac-${mac_new_name[i]}.tar.gz" -C ./tmp-release/ CrashCore
+          done
           rm -rf ./tmp-release*
 
       - name: Download `sing-box Dev` files
@@ -338,8 +361,8 @@ jobs:
         run: |
           # Linux
           mkdir -p ./sing-box/
-          linux_old_name=(amd64 armv5 armv6 armv7-musl arm64 mips-softfloat mipsle-softfloat mipsle)
-          linux_new_name=(amd64 armv5 armv6 armv7 armv8 mips-softfloat mipsle-softfloat mipsle-hardfloat)
+          linux_old_name=(amd64 arm64)
+          linux_new_name=(amd64 armv8)
           for i in "${!linux_old_name[@]}"; do
             mkdir -p "./tmp-dev/dev_linux_${linux_old_name[i]}"
             curl -L "${download_url}/${dev_version}/sing-box-${dev_version#v}-linux-${linux_old_name[i]}.tar.gz" | tar -zx -C "./tmp-dev/dev_linux_${linux_old_name[i]}/"
@@ -355,6 +378,16 @@ jobs:
             wget -P "./tmp-dev/dev_windows_${arch}/" "${download_url}/${dev_version}/sing-box-${dev_version#v}-windows-${arch}.zip"
             unzip -o "./tmp-dev/dev_windows_${arch}/sing-box-${dev_version#v}-windows-${arch}.zip" -d "./tmp-dev/dev_windows_${arch}/"
             mv -f "./tmp-dev/dev_windows_${arch}/sing-box-${dev_version#v}-windows-${arch}/sing-box.exe" "./sing-box/sing-box-dev-windows-${arch}.exe"
+          done
+          # Mac
+          mac_old_name=(amd64 arm64)
+          mac_new_name=(amd64 armv64)
+          for i in "${!mac_old_name[@]}"; do
+            mkdir -p "./tmp-dev/dev_mac_${mac_old_name[i]}"
+            curl -L "${download_url}/${dev_version}/sing-box-${dev_version#v}-mac-${mac_old_name[i]}.tar.gz" | tar -zx -C "./tmp-dev/dev_mac_${mac_old_name[i]}/"
+            mv -f "./tmp-dev/dev_mac_${mac_old_name[i]}/sing-box-${dev_version#v}-mac-${mac_old_name[i]}/sing-box" ./tmp-dev/CrashCore
+            chmod +x ./tmp-dev/CrashCore
+            tar --no-same-owner -czf "./sing-box/sing-box-dev-mac-${mac_new_name[i]}.tar.gz" -C ./tmp-dev/ CrashCore
           done
           rm -rf ./tmp-dev*
 
