@@ -349,8 +349,8 @@ jobs:
           mac_new_name=(arm64 amd64)
           for i in "${!mac_old_name[@]}"; do
             mkdir -p "./tmp-release/release_mac_${mac_old_name[i]}"
-            curl -L "${download_url}/${release_version}/sing-box-${release_version#v}-mac-${mac_old_name[i]}.tar.gz" | tar -zx -C "./tmp-release/release_mac_${mac_old_name[i]}/"
-            mv -f "./tmp-release/release_mac_${mac_old_name[i]}/sing-box-${release_version#v}-mac-${mac_old_name[i]}/sing-box" ./tmp-release/CrashCore
+            curl -L "${download_url}/${release_version}/sing-box-${release_version#v}-darwin-${mac_old_name[i]}.tar.gz" | tar -zx -C "./tmp-release/release_mac_${mac_old_name[i]}/"
+            mv -f "./tmp-release/release_mac_${mac_old_name[i]}/sing-box-${release_version#v}-darwin-${mac_old_name[i]}/sing-box" ./tmp-release/CrashCore
             chmod +x ./tmp-release/CrashCore
             tar --no-same-owner -czf "./sing-box/sing-box-release-mac-${mac_new_name[i]}.tar.gz" -C ./tmp-release/ CrashCore
           done
@@ -379,13 +379,14 @@ jobs:
             unzip -o "./tmp-dev/dev_windows_${arch}/sing-box-${dev_version#v}-windows-${arch}.zip" -d "./tmp-dev/dev_windows_${arch}/"
             mv -f "./tmp-dev/dev_windows_${arch}/sing-box-${dev_version#v}-windows-${arch}/sing-box.exe" "./sing-box/sing-box-dev-windows-${arch}.exe"
           done
+          
           # Mac
           mac_old_name=(amd64 arm64)
           mac_new_name=(amd64 armv64)
           for i in "${!mac_old_name[@]}"; do
             mkdir -p "./tmp-dev/dev_mac_${mac_old_name[i]}"
-            curl -L "${download_url}/${dev_version}/sing-box-${dev_version#v}-mac-${mac_old_name[i]}.tar.gz" | tar -zx -C "./tmp-dev/dev_mac_${mac_old_name[i]}/"
-            mv -f "./tmp-dev/dev_mac_${mac_old_name[i]}/sing-box-${dev_version#v}-mac-${mac_old_name[i]}/sing-box" ./tmp-dev/CrashCore
+            curl -L "${download_url}/${dev_version}/sing-box-${dev_version#v}-darwin-${mac_old_name[i]}.tar.gz" | tar -zx -C "./tmp-dev/dev_mac_${mac_old_name[i]}/"
+            mv -f "./tmp-dev/dev_mac_${mac_old_name[i]}/sing-box-${dev_version#v}-darwin-${mac_old_name[i]}/sing-box" ./tmp-dev/CrashCore
             chmod +x ./tmp-dev/CrashCore
             tar --no-same-owner -czf "./sing-box/sing-box-dev-mac-${mac_new_name[i]}.tar.gz" -C ./tmp-dev/ CrashCore
           done
