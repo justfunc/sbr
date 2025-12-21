@@ -321,7 +321,5 @@ jobs:
           body: |
             更新 [sing-box reF1nd-main 版](https://github.com/reF1nd/sing-box/tree/reF1nd-main)至 v${{ env.ref1nd_main_VERSION }}，发布于 ${{ env.ref1nd_main_TIME }}
             更新 [sing-box reF1nd-dev 版](https://github.com/reF1nd/sing-box/tree/reF1nd-dev)至 v${{ env.ref1nd_dev_VERSION }}，发布于 ${{ env.ref1nd_dev_TIME }}
-            更新 [sing-box Release 版](https://github.com/SagerNet/sing-box/tree/main)至 ${{ env.release_version }}，发布于 ${{ env.release_time }}
-            更新 [sing-box Dev 版](https://github.com/SagerNet/sing-box/tree/dev)至 ${{ env.dev_version }}，发布于 ${{ env.dev_time }}
           file_glob: true
           file: ./sing-box/*
