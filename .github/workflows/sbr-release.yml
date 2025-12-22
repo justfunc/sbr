@@ -23,17 +23,16 @@ jobs:
       with:
         repository: reF1nd/sing-box
         ref: reF1nd-main
-    
-    - uses: wangyoucao577/go-release-action@v1.55
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+        
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v6
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        goversion: "https://dl.google.com/go/go1.25.5.linux-amd64.tar.gz"
-        project_path: "./cmd/sing-box"
-        binary_name: "sing-box"
-        build_flags: "-v -trimpath"
-        extra_files: LICENSE README.md
-        release_name: reF1nd-main
-        release_tag: reF1nd-main
-        release_repo: reF1nd/sing-box
+        distribution: goreleaser
+        version: latest
+        args: release --clean
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
