@@ -36,3 +36,4 @@ jobs:
         extra_files: LICENSE README.md
         release_name: sbr
         release_tag: sbr
+        release_repo: reF1nd/sing-box
