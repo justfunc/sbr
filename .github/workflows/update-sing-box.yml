@@ -9,7 +9,7 @@ on:
     paths-ignore:
       - "README.md"
       - ".github/workflows/delete-old-workflows.yml"
-      - ".github/workflows/sbr-release.yaml"
+      - ".github/workflows/sbr-release.yml"
 
 jobs:
   go:

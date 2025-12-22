@@ -1,3 +1,5 @@
+name: sbr release
+
 on:
   workflow_dispatch:
   release:
