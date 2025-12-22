@@ -22,7 +22,7 @@ jobs:
         repository: reF1nd/sing-box
         ref: reF1nd-main
     
-    - uses: wangyoucao577/go-release-action@v1
+    - uses: wangyoucao577/go-release-action@v1.55
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
