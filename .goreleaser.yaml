@@ -1,4 +1,5 @@
 builds:
+  - id: sbr build
   - env:
       - CGO_ENABLED=0
     goos:
@@ -6,5 +7,5 @@ builds:
       - windows
       - darwin
     goarch:
-    - amd64
-    - arm64
+      - amd64
+      - arm64
