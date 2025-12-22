@@ -34,3 +34,4 @@ jobs:
         binary_name: "sing-box"
         build_flags: "-v -trimpath"
         extra_files: LICENSE README.md
+        release_name: sbr
