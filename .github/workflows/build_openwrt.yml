@@ -29,7 +29,6 @@ jobs:
         run: |
           # 1. 获取最新的 Git Tag (例如 1.11.0-alpha.10)
           # 2. 如果没有 Tag，则使用最新的 Commit Hash
-          # 3. 加上 -ref1nd 后缀
           GIT_VERSION=$(git describe --tags --always)
           VERSION_STR="ref1nd-${GIT_VERSION}"
           echo "Building Version: $VERSION_STR"
@@ -56,16 +55,18 @@ jobs:
               -linkmode external \
               -extldflags '-static' \
               -X 'github.com/sagernet/sing-box/constant.Version=$VERSION_VAL'" \
-            -o sing-box-arm64 ./cmd/sing-box
+            -o CrashCore ./cmd/sing-box
 
       - name: Download libcronet
         run: |
           wget "https://github.com/SagerNet/cronet-go/releases/latest/download/libcronet-linux-arm64.so" -O libcronet.so
 
+      - name: Create Bundle (CrashCore.gz)
+        run: |
+          tar -cvzf CrashCore.gz CrashCore libcronet.so
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: sing-box-ref1nd-aarch64
-          path: |
-            sing-box-arm64
-            libcronet.so
+          name: sing-box-ref1nd-aarch64-${{ steps.prepare_version.outputs.VERSION }}
+          path: CrashCore.gz
