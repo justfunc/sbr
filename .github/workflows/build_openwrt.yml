@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: reF1nd/sing-box
-          ref: reF1nd-testing
+          ref: reF1nd-stable
           fetch-depth: 0 # 必须设为 0 才能获取所有历史记录和标签以提取版本号
 
       - name: Setup Go
