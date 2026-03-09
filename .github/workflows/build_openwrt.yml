@@ -43,7 +43,7 @@ jobs:
           echo "Current cronet-go version: $CRONET_VERSION"
           
           # 下载对应的 arm64 库文件
-          wget "https://github.com/SagerNet/cronet-go/releases/download/${CRONET_VERSION}/libcronet-linux-arm64.so" -O libcronet.so
+          wget "https://github.com/SagerNet/cronet-go/releases/latest/download/libcronet-linux-arm64.so" -O libcronet.so
 
       - name: Package and Upload
         uses: actions/upload-artifact@v4
