@@ -63,10 +63,10 @@ jobs:
 
       - name: Create Bundle (CrashCore.gz)
         run: |
-          tar -cvzf CrashCore.gz CrashCore libcronet.so
+          tar -cvzf CrashCore.tar.gz CrashCore libcronet.so
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: sing-box-ref1nd-aarch64-${{ steps.prepare_version.outputs.VERSION }}
-          path: CrashCore.gz
+          path: CrashCore.tar.gz
