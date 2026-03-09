@@ -1,7 +1,7 @@
-name: Build sing-box-ref1nd for OpenWrt ARM64
+name: Build sing-box-ref1nd for OpenWrt aarch64
 
 on:
-  workflow_dispatch: # 手动点击触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,44 +11,47 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: reF1nd/sing-box
-          ref: reF1nd-stable # 确保是 ref1nd 的开发分支
-          fetch-depth: 0
+          ref: reF1nd-stable # ref1nd 增强分支
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24' # 必须使用 Go 1.24 或以上版本
+          go-version: '1.24'
 
-      - name: Compile sing-box
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.13.0
+
+      - name: Compile (Truly Static Musl)
         run: |
-          # 关键环境变量：CGO_ENABLED=0 确保静态编译，不依赖宿主系统的 libc
-          export CGO_ENABLED=0
+          # 启用 CGO 但使用 zig 作为编译器指向 musl
+          export CGO_ENABLED=1
           export GOOS=linux
           export GOARCH=arm64
-          
-          # 定义编译标签：加入 naive 和 purego 模式
-          # with_purego 允许在不使用 CGO 的情况下，动态加载 libcronet.so
+          export CC="zig cc -target aarch64-linux-musl"
+          export CXX="zig ++ -target aarch64-linux-musl"
+
+          # 编译标签
           TAGS="with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_gvisor,with_naive_outbound,with_purego"
           
-          # 编译命令
-          # -extldflags "-static" 强制静态链接
-          go build -v -tags "$TAGS" \
-            -ldflags "-s -w -buildid= -extldflags '-static' -X 'github.com/sagernet/sing-box/constant.Version=ref1nd-custom'" \
+          # 关键点：
+          # 1. -linkmode external 强制使用外部链接器 (zig)
+          # 2. -extldflags "-static" 强制全静态链接，不依赖任何 .so
+          go build -v \
+            -trimpath \
+            -tags "$TAGS" \
+            -ldflags "-s -w -buildid= -linkmode external -extldflags '-static' -X 'github.com/sagernet/sing-box/constant.Version=ref1nd-musl-static'" \
             -o sing-box-arm64 ./cmd/sing-box
 
-      - name: Download libcronet for Naive
+      - name: Download libcronet
         run: |
-          # 获取当前代码依赖的 cronet-go 版本
-          CRONET_VERSION=$(go list -m github.com/sagernet/cronet-go | awk '{print $2}')
-          echo "Current cronet-go version: $CRONET_VERSION"
-          
-          # 下载对应的 arm64 库文件
           wget "https://github.com/SagerNet/cronet-go/releases/latest/download/libcronet-linux-arm64.so" -O libcronet.so
 
-      - name: Package and Upload
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: sing-box-openwrt-aarch64
+          name: sing-box-fixed-aarch64
           path: |
             sing-box-arm64
             libcronet.so
