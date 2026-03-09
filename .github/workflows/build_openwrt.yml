@@ -1,0 +1,54 @@
+name: Build sing-box-ref1nd for OpenWrt ARM64
+
+on:
+  workflow_dispatch: # 手动点击触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          repository: reF1nd/sing-box
+          ref: reF1nd-stable # 确保是 ref1nd 的开发分支
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24' # 必须使用 Go 1.24 或以上版本
+
+      - name: Compile sing-box
+        run: |
+          # 关键环境变量：CGO_ENABLED=0 确保静态编译，不依赖宿主系统的 libc
+          export CGO_ENABLED=0
+          export GOOS=linux
+          export GOARCH=arm64
+          
+          # 定义编译标签：加入 naive 和 purego 模式
+          # with_purego 允许在不使用 CGO 的情况下，动态加载 libcronet.so
+          TAGS="with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_gvisor,with_naive_outbound,with_purego"
+          
+          # 编译命令
+          # -extldflags "-static" 强制静态链接
+          go build -v -tags "$TAGS" \
+            -ldflags "-s -w -buildid= -extldflags '-static' -X 'github.com/sagernet/sing-box/constant.Version=ref1nd-custom'" \
+            -o sing-box-arm64 ./cmd/sing-box
+
+      - name: Download libcronet for Naive
+        run: |
+          # 获取当前代码依赖的 cronet-go 版本
+          CRONET_VERSION=$(go list -m github.com/sagernet/cronet-go | awk '{print $2}')
+          echo "Current cronet-go version: $CRONET_VERSION"
+          
+          # 下载对应的 arm64 库文件
+          wget "https://github.com/SagerNet/cronet-go/releases/download/${CRONET_VERSION}/libcronet-linux-arm64.so" -O libcronet.so
+
+      - name: Package and Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: sing-box-openwrt-aarch64
+          path: |
+            sing-box-arm64
+            libcronet.so
