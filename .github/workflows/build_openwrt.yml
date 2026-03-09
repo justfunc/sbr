@@ -42,7 +42,7 @@ jobs:
           export CC="zig cc -target aarch64-linux-musl"
           export CXX="zig ++ -target aarch64-linux-musl"
 
-          TAGS="with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_gvisor,with_naive,with_naive_outbound,with_cronet,with_purego"
+          TAGS="with_quic,with_grpc,with_dhcp,with_wireguard,with_utls,with_gvisor,with_acme,with_clash_api,with_tailscale,with_ccm,with_ocm,badlinkname,tfogo_checklinkname0,with_naive,with_naive_outbound,with_cronet,with_musl"
           
           # 获取上面步骤生成的版本号
           VERSION_VAL="${{ steps.prepare_version.outputs.VERSION }}"
