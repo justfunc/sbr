@@ -1,4 +1,4 @@
-name: Build sing-box-ref1nd for OpenWrt aarch64
+name: Build CrashCore (sing-box-ref1nd) for OpenWrt aarch64
 
 on:
   workflow_dispatch:
@@ -27,8 +27,7 @@ jobs:
       - name: Prepare Version String
         id: prepare_version
         run: |
-          # 1. 获取最新的 Git Tag (例如 1.11.0-alpha.10)
-          # 2. 如果没有 Tag，则使用最新的 Commit Hash
+          # 1. 提取版本号
           GIT_VERSION=$(git describe --tags --always)
           VERSION_STR="${GIT_VERSION}"
           echo "Building Version: $VERSION_STR"
@@ -36,13 +35,14 @@ jobs:
 
       - name: Compile (Truly Static Musl)
         run: |
+          # 开启 CGO，并使用 Zig 模拟 OpenWrt 的 musl 环境
           export CGO_ENABLED=1
           export GOOS=linux
           export GOARCH=arm64
           export CC="zig cc -target aarch64-linux-musl"
           export CXX="zig ++ -target aarch64-linux-musl"
 
-          TAGS="with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_gvisor,with_naive_outbound,with_purego"
+          TAGS="with_quic,with_dhcp,with_wireguard,with_utls,with_acme,with_clash_api,with_gvisor,with_naive,with_naive_outbound,with_cronet,with_purego"
           
           # 获取上面步骤生成的版本号
           VERSION_VAL="${{ steps.prepare_version.outputs.VERSION }}"
@@ -65,7 +65,7 @@ jobs:
         run: |
           tar -cvzf CrashCore.tar.gz CrashCore libcronet.so
 
-      - name: Upload
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: sing-box-ref1nd-aarch64-${{ steps.prepare_version.outputs.VERSION }}
