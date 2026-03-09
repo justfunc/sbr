@@ -30,7 +30,7 @@ jobs:
           # 1. 获取最新的 Git Tag (例如 1.11.0-alpha.10)
           # 2. 如果没有 Tag，则使用最新的 Commit Hash
           GIT_VERSION=$(git describe --tags --always)
-          VERSION_STR="ref1nd-${GIT_VERSION}"
+          VERSION_STR="${GIT_VERSION}"
           echo "Building Version: $VERSION_STR"
           echo "VERSION=$VERSION_STR" >> $GITHUB_OUTPUT
 
