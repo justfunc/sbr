@@ -19,7 +19,7 @@ jobs:
       - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
         run: |
           sudo apt-get update
-          bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)
+          sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
 
       - name: 更新 feeds 并安装
         working-directory: immortalwrt
