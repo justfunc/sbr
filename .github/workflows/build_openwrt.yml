@@ -19,6 +19,22 @@ jobs:
           sudo apt-get update
           sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
 
+      - name: 缓存 dl/
+        uses: actions/cache@v4
+        id: cache-dl
+        with:
+          path: immortalwrt/dl
+          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/feeds.conf.default') }}-${{ hashFiles('immortalwrt/.config') }}
+          restore-keys: ${{ runner.os }}-immortalwrt-dl-
+  
+      - name: 缓存 staging_dir/
+        uses: actions/cache@v4
+        id: cache-staging
+        with:
+          path: immortalwrt/staging_dir
+          key: ${{ runner.os }}-immortalwrt-staging-${{ hashFiles('immortalwrt/feeds.conf.default') }}-${{ hashFiles('immortalwrt/.config') }}
+          restore-keys: ${{ runner.os }}-immortalwrt-staging-
+          
       - name: 更新 feeds 并安装
         working-directory: immortalwrt
         run: |
@@ -29,6 +45,7 @@ jobs:
         working-directory: immortalwrt
         run: |
           cp defconfig/mt7986-ax6000.config .config
+          echo "CONFIG_CCACHE=y" >> .config
           make defconfig
           # 只保留这一个设备（注释掉其他 mediatek/filogic 设备）
           sed -i '/CONFIG_TARGET_mediatek=y/a CONFIG_TARGET_mediatek_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y' .config
