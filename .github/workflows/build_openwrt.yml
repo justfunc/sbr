@@ -38,14 +38,10 @@ jobs:
         run: |
           make download -j$(nproc) || true
 
-      - name: 编译 kernel 和 target 基础部分
-        working-directory: immortalwrt
-        run: make target/linux/install -j$(nproc) V=s IGNORE_ERRORS=1
-
       - name: 开始编译（U-Boot mod 固件）
         working-directory: immortalwrt
         run: |
-          make target/linux/image PROFILE=xiaomi_redmi-router-ax6000-ubootmod \
+          make image PROFILE=xiaomi_redmi-router-ax6000-ubootmod \
           -j$(nproc) V=s 2>&1 | tee build.log
         env:
           MAKEFLAGS: "-j$(nproc)"
