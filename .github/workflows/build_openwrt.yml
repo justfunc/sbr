@@ -26,7 +26,12 @@ jobs:
           path: immortalwrt/dl
           key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/feeds.conf.default') }}-${{ hashFiles('immortalwrt/.config') }}
           restore-keys: ${{ runner.os }}-immortalwrt-dl-
-  
+          
+      - name: 更新 feeds 并安装
+        working-directory: immortalwrt
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
       - name: 缓存 staging_dir/
         uses: actions/cache@v5.0.3
         id: cache-staging
@@ -34,12 +39,6 @@ jobs:
           path: immortalwrt/staging_dir
           key: ${{ runner.os }}-immortalwrt-staging-${{ hashFiles('immortalwrt/feeds.conf.default') }}-${{ hashFiles('immortalwrt/.config') }}
           restore-keys: ${{ runner.os }}-immortalwrt-staging-
-          
-      - name: 更新 feeds 并安装
-        working-directory: immortalwrt
-        run: |
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
 
       - name: 加载 Redmi AX6000 U-Boot 版本配置（ubootmod）
         working-directory: immortalwrt
@@ -63,8 +62,9 @@ jobs:
       - name: 开始编译（U-Boot mod 固件）
         working-directory: immortalwrt
         run: |
-          make PROFILE=xiaomi_redmi-router-ax6000-ubootmod \
-          -j$(nproc) V=s 2>&1 | tee build.log
+          make -j$(nproc) IGNORE_ERRORS=1 V=s || true
+          make image PROFILE=xiaomi_redmi-router-ax6000-ubootmod \
+          -j$(nproc) V=s 2>&1 | tee image-build.log
         env:
           MAKEFLAGS: "-j$(nproc)"
 
@@ -74,6 +74,7 @@ jobs:
           name: ImmortalWrt-Redmi-AX6000-UbootMod-${{ github.run_number }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic/*
+            immortalwrt/image-build.log
           retention-days: 30
 
       - name: 清理缓存（可选，节省空间）
