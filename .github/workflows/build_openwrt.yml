@@ -30,6 +30,11 @@ jobs:
         run: |
           cp defconfig/mt7986-ax6000.config .config
           make defconfig
+          # 只保留这一个设备（注释掉其他 mediatek/filogic 设备）
+          sed -i '/CONFIG_TARGET_mediatek=y/a CONFIG_TARGET_mediatek_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y' .config
+          sed -i '/CONFIG_TARGET_mediatek_DEVICE_/s/^/#/' .config   # 先全部注释
+          sed -i 's/#CONFIG_TARGET_mediatek_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y/CONFIG_TARGET_mediatek_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y/' .config
+
           # 可选：查看最终配置（调试用）
           grep -E "TARGET|DEVICE|ubootmod" .config
 
