@@ -2,15 +2,13 @@ name: 编译 ImmortalWrt Redmi AX6000 U-Boot 版本 (mt7986-ax6000-ubootmod)
 
 on:
   workflow_dispatch:  # 手动触发（推荐）
-  push:
-    branches: [ main ]  # 如果你 fork 了仓库并推送到 main，也可以自动触发
 
 jobs:
   build:
     runs-on: ubuntu-22.04  # OpenWrt 推荐版本，稳定性高
     steps:
       - name: 检出最新代码（padavanonly/immortalwrt-mt798x-6.6）
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           repository: padavanonly/immortalwrt-mt798x-6.6
           ref: openwrt-24.10-6.6  # 当前活跃分支（内核 6.6）
@@ -48,7 +46,7 @@ jobs:
           MAKEFLAGS: "-j$(nproc)"
 
       - name: 上传编译产物（U-Boot 版本固件）
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: ImmortalWrt-Redmi-AX6000-UbootMod-${{ github.run_number }}
           path: |
