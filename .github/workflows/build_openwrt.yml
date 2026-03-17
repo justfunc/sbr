@@ -74,7 +74,6 @@ jobs:
           name: ImmortalWrt-Redmi-AX6000-UbootMod-${{ github.run_number }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic/*
-            immortalwrt/image-build.log
           retention-days: 30
 
       - name: 清理缓存（可选，节省空间）
