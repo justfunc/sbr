@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-22.04  # OpenWrt 推荐版本，稳定性高
     steps:
       - name: 检出最新代码（padavanonly/immortalwrt-mt798x-6.6）
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: padavanonly/immortalwrt-mt798x-6.6
           ref: openwrt-24.10-6.6  # 当前活跃分支（内核 6.6）
