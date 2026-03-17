@@ -38,10 +38,15 @@ jobs:
         run: |
           make download -j$(nproc) || true
 
+      - name: 编译 kernel 和 target 基础部分
+        working-directory: immortalwrt
+        run: make target/linux/install -j$(nproc) V=s IGNORE_ERRORS=1
+
       - name: 开始编译（U-Boot mod 固件）
         working-directory: immortalwrt
         run: |
-          make -j$(nproc) V=s 2>&1 | tee build.log
+          make target/linux/image PROFILE=xiaomi_redmi-router-ax6000-ubootmod \
+          -j$(nproc) V=s 2>&1 | tee build.log
         env:
           MAKEFLAGS: "-j$(nproc)"
 
@@ -51,7 +56,6 @@ jobs:
           name: ImmortalWrt-Redmi-AX6000-UbootMod-${{ github.run_number }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic/*
-            immortalwrt/build.log
           retention-days: 30
 
       - name: 清理缓存（可选，节省空间）
