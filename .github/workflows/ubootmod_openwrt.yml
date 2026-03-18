@@ -46,19 +46,14 @@ jobs:
         run: |
          cp target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts immortalwrt/target/linux/mediatek/dts/
          batch scripts/apply_multi_version_patches.sh
+         cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
 
 
       - name: 加载 Redmi AX6000 U-Boot 版本配置（ubootmod）
         working-directory: immortalwrt
         run: |
-          cp defconfig/mt7986-ax6000.config .config
           echo "CONFIG_CCACHE=y" >> .config
           make defconfig
-          # 只保留这一个设备（注释掉其他 mediatek/filogic 设备）
-          sed -i '/CONFIG_TARGET_mediatek=y/a CONFIG_TARGET_mediatek_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y' .config
-          sed -i '/CONFIG_TARGET_mediatek_DEVICE_/s/^/#/' .config   # 先全部注释
-          sed -i 's/#CONFIG_TARGET_mediatek_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y/CONFIG_TARGET_mediatek_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y/' .config
-
           # 可选：查看最终配置（调试用）
           grep -E "TARGET|DEVICE|ubootmod" .config
 
@@ -70,9 +65,7 @@ jobs:
       - name: 开始编译（U-Boot mod 固件）
         working-directory: immortalwrt
         run: |
-          make -j$(nproc) IGNORE_ERRORS=1 V=s || true
-          make image PROFILE=xiaomi_redmi-router-ax6000-ubootmod \
-          -j$(nproc) V=s 2>&1 | tee image-build.log
+          make -j$(nproc) V=s 2>&1 | tee image-build.log
         env:
           MAKEFLAGS: "-j$(nproc)"
 
