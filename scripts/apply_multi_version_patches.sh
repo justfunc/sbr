@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-cat >> immortalwrt/target/linux/mediatek/image/filogic.mk <<EOF
+cat >> immortalwrt/target/linux/mediatek/image/filogic.mk << 'EOF'
 
 define Device/xiaomi_redmi-router-ax6000-ubootmod-standard
   DEVICE_VENDOR := Xiaomi
@@ -32,4 +32,5 @@ endif
 endif
 endef
 TARGET_DEVICES += xiaomi_redmi-router-ax6000-ubootmod-standard
+
 EOF
