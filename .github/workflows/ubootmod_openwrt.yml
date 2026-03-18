@@ -32,9 +32,9 @@ jobs:
 
       - name: 复制配置文件
         run: |
-          cp target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts immortalwrt/target/linux/mediatek/dts/
-          bash scripts/apply_multi_version_patches.sh
-          cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
+          cp target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
+          # bash scripts/apply_multi_version_patches.sh
+          # cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
 
       - name: 缓存 dl/
         uses: actions/cache@v5.0.3
@@ -59,6 +59,7 @@ jobs:
       - name: 加载 Redmi AX6000 U-Boot 版本配置（ubootmod）
         working-directory: immortalwrt
         run: |
+          cp defconfig/mt7986-ax6000.config .config
           echo "CONFIG_CCACHE=y" >> .config
           make defconfig
           echo "=== 配置验证 ==="
