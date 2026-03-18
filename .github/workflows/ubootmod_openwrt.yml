@@ -55,7 +55,7 @@ jobs:
       - name: add ubootmod-standard pathch
         run: |
          cp target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts immortalwrt/target/linux/mediatek/dts/
-         batch scripts/apply_multi_version_patches.sh
+         bash scripts/apply_multi_version_patches.sh
          cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
 
 
