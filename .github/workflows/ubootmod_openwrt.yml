@@ -3,10 +3,17 @@ name: Build ubootmod-standard-Version Redmi AX6000
 on:
   workflow_dispatch:  # 手动触发（推荐）
 
+env:
+  TZ: Asia/Shanghai
+
 jobs:
   build:
     runs-on: ubuntu-22.04  # OpenWrt 推荐版本，稳定性高
     steps:
+
+      - name: Check out
+        uses: actions/checkout@v6.0.2
+
       - name: 检出最新代码（padavanonly/immortalwrt-mt798x-6.6）
         uses: actions/checkout@v6.0.2
         with:
@@ -19,6 +26,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
 
       - name: 缓存 dl/
         uses: actions/cache@v5.0.3
@@ -44,7 +54,6 @@ jobs:
 
       - name: add ubootmod-standard pathch
         run: |
-         tree ./
          cp target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts immortalwrt/target/linux/mediatek/dts/
          batch scripts/apply_multi_version_patches.sh
          cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
