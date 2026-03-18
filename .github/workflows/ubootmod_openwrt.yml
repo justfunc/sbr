@@ -87,11 +87,18 @@ jobs:
         working-directory: immortalwrt
         run: |
           echo "=== 编译产物列表 ==="
-          find bin/targets/mediatek/filogic/ -type f -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" 2>/dev/null || echo "未找到编译产物"
+          find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
           echo "=== 检查三个版本的固件 ==="
-          ls -lh bin/targets/mediatek/filogic/*stock* || echo "stock 版本缺失"
-          ls -lh bin/targets/mediatek/filogic/*ubootmod.bin || echo "ubootmod 版本缺失"
-          ls -lh bin/targets/mediatek/filogic/*ubootmod-standard.bin || echo "ubootmod-standard 版本缺失"
+          ls -lh bin/targets/mediatek/filogic/*stock* 2>/dev/null || echo "stock 版本缺失"
+          ls -lh bin/targets/mediatek/filogic/*ubootmod.bin 2>/dev/null || echo "ubootmod 版本缺失"
+          ls -lh bin/targets/mediatek/filogic/*ubootmod-standard.bin 2>/dev/null || echo "ubootmod-standard 版本缺失"
+          echo "=== 检查恢复镜像 ==="
+          ls -lh bin/targets/mediatek/filogic/*recovery.itb 2>/dev/null || echo "recovery.itb 缺失"
+          ls -lh bin/targets/mediatek/filogic/*initramfs-factory.ubi 2>/dev/null || echo "initramfs-factory.ubi 缺失"
+          echo "=== 检查 FIP 文件 ==="
+          ls -lh bin/targets/mediatek/filogic/*bl31-uboot.fip 2>/dev/null || echo "bl31-uboot.fip 缺失"
+          echo "=== 检查内核文件 ==="
+          ls -lh bin/targets/mediatek/filogic/*kernel* 2>/dev/null || echo "kernel 文件缺失"
           echo "=== 编译产物目录 ==="
           ls -lh bin/targets/mediatek/filogic/ || true
 
@@ -102,7 +109,11 @@ jobs:
           name: ImmortalWrt-Redmi-AX6000-UbootMod-${{ github.run_number }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic/*squashfs*
-            immortalwrt/bin/targets/mediatek/filogic/*initramfs*
+            immortalwrt/bin/targets/mediatek/filogic/*recovery.itb
+            immortalwrt/bin/targets/mediatek/filogic/*initramfs-factory.ubi
+            immortalwrt/bin/targets/mediatek/filogic/*bl31-uboot.fip
+            immortalwrt/bin/targets/mediatek/filogic/*preloader.bin
+            immortalwrt/bin/targets/mediatek/filogic/*kernel*
             immortalwrt/bin/targets/mediatek/filogic/*.manifest
           retention-days: 30
           if-no-files-found: warn
