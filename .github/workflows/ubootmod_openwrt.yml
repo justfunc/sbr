@@ -35,7 +35,7 @@ jobs:
         id: cache-dl
         with:
           path: immortalwrt/dl
-          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/feeds.conf.default') }}-${{ hashFiles('immortalwrt/.config') }}
+          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/.config') }}
           restore-keys: ${{ runner.os }}-immortalwrt-dl-
           
       - name: 更新 feeds 并安装
