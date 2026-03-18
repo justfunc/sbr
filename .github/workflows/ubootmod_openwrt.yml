@@ -57,8 +57,6 @@ jobs:
          cp target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts immortalwrt/target/linux/mediatek/dts/
          bash scripts/apply_multi_version_patches.sh
          cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
-         cat immortalwrt/target/linux/mediatek/image/filogic.mk
-
 
       - name: 加载 Redmi AX6000 U-Boot 版本配置（ubootmod）
         working-directory: immortalwrt
@@ -75,10 +73,7 @@ jobs:
 
       - name: 开始编译（U-Boot mod 固件）
         working-directory: immortalwrt
-        run: |
-          make -j$(nproc) V=s 2>&1 | tee image-build.log
-        env:
-          MAKEFLAGS: "-j$(nproc)"
+        run: make -j$(nproc) V=s 2>&1 | tee build.log
 
       - name: 上传编译产物（U-Boot 版本固件）
         uses: actions/upload-artifact@v7.0.0
