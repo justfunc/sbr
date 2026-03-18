@@ -1,0 +1,299 @@
+name: Build Multi-Version Redmi AX6000
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: '选择要编译的固件版本'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - stock
+        - ubootmod
+        - ubootmod-standard
+
+env:
+  TZ: 'Asia/Shanghai'
+
+jobs:
+  apply-patches:
+    name: 应用多版本补丁
+    runs-on: ubuntu-latest
+    steps:
+    - name: 克隆代码
+      uses: actions/checkout@v6.0.2
+      with:
+        repository: padavanonly/immortalwrt-mt798x-6.6
+        ref: openwrt-24.10-6.6  # 当前活跃分支（内核 6.6）
+        fetch-depth: 0
+
+    - name: 应用补丁脚本
+      run: |
+        chmod +x scrip.sh
+        ./scripts/apply_multi_version_patches.sh
+
+    - name: 验证补丁
+      run: |
+        echo "检查设备树文件..."
+        [ -f target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts ] && echo "✓ 设备树文件存在" || exit 1
+        
+        echo "检查defconfig文件..."
+        [ -f defconfig/mt7986-ax6000-stock.config ] && echo "✓ stock config存在" || exit 1
+        [ -f defconfig/mt7986-ax6000-ubootmod.config ] && echo "✓ ubootmod config存在" || exit 1
+        [ -f defconfig/mt7986-ax6000-ubootmod-standard.config ] && echo "✓ ubootmod-standard config存在" || exit 1
+        
+        echo "检查filogic.mk..."
+        grep -q "xiaomi_redmi-router-ax6000-ubootmod-standard" target/linux/mediatek/image/filogic.mk && echo "✓ filogic.mk已修改" || exit 1
+        
+        echo ""
+        echo "✅ 所有补丁验证通过"
+
+    - name: 上传补丁文件
+      uses: actions/upload-artifact@v4
+      with:
+        name: patched-files
+        path: |
+          target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts
+          defconfig/
+          scripts/apply_multi_version_patches.sh
+          .github/workflows/
+        retention-days: 7
+
+  build-stock:
+    name: 编译 Stock 版本
+    runs-on: ubuntu-latest
+    needs: apply-patches
+    if: github.event.inputs.variant == 'all' || github.event.inputs.variant == 'stock' || github.event_name != 'workflow_dispatch'
+    steps:
+    - name: 克隆代码
+      uses: actions/checkout@v4
+
+    - name: 下载补丁文件
+      uses: actions/download-artifact@v4
+      with:
+        name: patched-files
+
+    - name: 初始化构建环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get update
+        sudo -E apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
+          gettext git java-propose-classpath libelf-dev libncurses5-dev \
+          libncursesw5-dev libssl-dev python3 unzip wget python3-distutils \
+          python3-setuptools python3-pyelftools rsync subversion swig time xsltproc \
+          zlib1g-dev python3-pip python3-ply python3-pycryptodome qemu-utils
+
+    - name: 配置Feeds
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: 应用补丁
+      run: |
+        chmod +x scripts/apply_multi_version_patches.sh
+        ./scripts/apply_multi_version_patches.sh
+
+    - name: 配置编译选项
+      run: |
+        cp defconfig/mt7986-ax6000-stock.config .config
+        make defconfig
+
+    - name: 下载依赖包
+      run: |
+        make -j$(nproc) download
+
+    - name: 编译固件
+      run: |
+        make -j$(nproc) IGNORE_ERRORS=1
+
+    - name: 整理输出文件
+      run: |
+        mkdir -p output
+        cp bin/targets/mediatek/filogic/*redmi-ax6000-stock*.bin output/ 2>/dev/null || true
+        cp bin/targets/mediatek/filogic/*redmi-ax6000*.manifest output/ 2>/dev/null || true
+        ls -lh output/
+
+    - name: 上传固件
+      uses: actions/upload-artifact@v4
+      with:
+        name: immortalwrt-redmi-ax6000-stock
+        path: output/
+        retention-days: 30
+
+  build-ubootmod:
+    name: 编译 Ubootmod 版本
+    runs-on: ubuntu-latest
+    needs: apply-patches
+    if: github.event.inputs.variant == 'all' || github.event.inputs.variant == 'ubootmod' || github.event_name != 'workflow_dispatch'
+    steps:
+    - name: 克隆代码
+      uses: actions/checkout@v4
+
+    - name: 下载补丁文件
+      uses: actions/download-artifact@v4
+      with:
+        name: patched-files
+
+    - name: 初始化构建环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get update
+        sudo -E apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
+          gettext git java-propose-classpath libelf-dev libncurses5-dev \
+          libncursesw5-dev libssl-dev python3 unzip wget python3-distutils \
+          python3-setuptools python3-pyelftools rsync subversion swig time xsltproc \
+          zlib1g-dev python3-pip python3-ply python3-pycryptodome qemu-utils
+
+    - name: 配置Feeds
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: 应用补丁
+      run: |
+        chmod +x scripts/apply_multi_version_patches.sh
+        ./scripts/apply_multi_version_patches.sh
+
+    - name: 配置编译选项
+      run: |
+        cp defconfig/mt7986-ax6000-ubootmod.config .config
+        make defconfig
+
+    - name: 下载依赖包
+      run: |
+        make -j$(nproc) download
+
+    - name: 编译固件
+      run: |
+        make -j$(nproc) IGNORE_ERRORS=1
+
+    - name: 整理输出文件
+      run: |
+        mkdir -p output
+        cp bin/targets/mediatek/filogic/*redmi-ax6000-ubootmod*.bin output/ 2>/dev/null || true
+        cp bin/targets/mediatek/filogic/*redmi-ax6000*.manifest output/ 2>/dev/null || true
+        ls -lh output/
+
+    - name: 上传固件
+      uses: actions/upload-artifact@v4
+      with:
+        name: immortalwrt-redmi-ax6000-ubootmod
+        path: output/
+        retention-days: 30
+
+  build-ubootmod-standard:
+    name: 编译 Ubootmod-Standard 版本
+    runs-on: ubuntu-latest
+    needs: apply-patches
+    if: github.event.inputs.variant == 'all' || github.event.inputs.variant == 'ubootmod-standard' || github.event_name != 'workflow_dispatch'
+    steps:
+    - name: 克隆代码
+      uses: actions/checkout@v4
+
+    - name: 下载补丁文件
+      uses: actions/download-artifact@v4
+      with:
+        name: patched-files
+
+    - name: 初始化构建环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo -E apt-get update
+        sudo -E apt-get install -y build-essential ccache ecj fastjar file g++ gawk \
+          gettext git java-propose-classpath libelf-dev libncurses5-dev \
+          libncursesw5-dev libssl-dev python3 unzip wget python3-distutils \
+          python3-setuptools python3-pyelftools rsync subversion swig time xsltproc \
+          zlib1g-dev python3-pip python3-ply python3-pycryptodome qemu-utils
+
+    - name: 配置Feeds
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: 应用补丁
+      run: |
+        chmod +x scripts/apply_multi_version_patches.sh
+        ./scripts/apply_multi_version_patches.sh
+
+    - name: 配置编译选项
+      run: |
+        cp defconfig/mt7986-ax6000-ubootmod-standard.config .config
+        make defconfig
+
+    - name: 下载依赖包
+      run: |
+        make -j$(nproc) download
+
+    - name: 编译固件
+      run: |
+        make -j$(nproc) IGNORE_ERRORS=1
+
+    - name: 整理输出文件
+      run: |
+        mkdir -p output
+        cp bin/targets/mediatek/filogic/*redmi-ax6000-ubootmod-standard*.itb output/ 2>/dev/null || true
+        cp bin/targets/mediatek/filogic/*preloader*.bin output/ 2>/dev/null || true
+        cp bin/targets/mediatek/filogic/*bl31-uboot*.fip output/ 2>/dev/null || true
+        cp bin/targets/mediatek/filogic/*redmi-ax6000*.manifest output/ 2>/dev/null || true
+        ls -lh output/
+
+    - name: 上传固件
+      uses: actions/upload-artifact@v4
+      with:
+        name: immortalwrt-redmi-ax6000-ubootmod-standard
+        path: output/
+        retention-days: 30
+
+  build-summary:
+    name: 构建汇总
+    runs-on: ubuntu-latest
+    needs: [build-stock, build-ubootmod, build-ubootmod-standard]
+    if: always()
+    steps:
+    - name: 生成汇总报告
+      run: |
+        echo "# 🎉 ImmortalWrt Redmi AX6000 多版本固件构建报告" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 构建状态" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| 版本 | 状态 | 说明 |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|------|------|" >> $GITHUB_STEP_SUMMARY
+        echo "| **Stock** (原厂) | ${{ needs.build-stock.result == 'success' && '✅ 成功' || '❌ 失败' }} | 使用原厂U-Boot,适合新手 |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Ubootmod** (Hanwckf) | ${{ needs.build-ubootmod.result == 'success' && '✅ 成功' || '❌ 失败' }} | 不死U-Boot,支持双启动 |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Ubootmod-Standard** (官方) | ${{ needs.build-ubootmod-standard.result == 'success' && '✅ 成功' || '❌ 失败' }} | OpenWrt标准FIT镜像 ⭐ |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 固件下载" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "所有固件文件可在下方的 **Artifacts** 区域下载:" >> $GITHUB_STEP_SUMMARY
+        echo "- `immortalwrt-redmi-ax6000-stock`" >> $GITHUB_STEP_SUMMARY
+        echo "- `immortalwrt-redmi-ax6000-ubootmod`" >> $GITHUB_STEP_SUMMARY
+        echo "- `immortalwrt-redmi-ax6000-ubootmod-standard`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 刷机指南" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Stock版本" >> $GITHUB_STEP_SUMMARY
+        echo "1. 下载 `.sysupgrade.bin` 文件" >> $GITHUB_STEP_SUMMARY
+        echo "2. 登录原厂后台直接刷入" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Ubootmod版本" >> $GITHUB_STEP_SUMMARY
+        echo "1. 先刷入Hanwckf的不死U-Boot" >> $GITHUB_STEP_SUMMARY
+        echo "2. 下载 `.sysupgrade.bin` 文件" >> $GITHUB_STEP_SUMMARY
+        echo "3. 通过TFTP或SSH刷入" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Ubootmod-Standard版本" >> $GITHUB_STEP_SUMMARY
+        echo "1. 先刷入官方U-Boot (preloader.bin + bl31-uboot.fip)" >> $GITHUB_STEP_SUMMARY
+        echo "2. 下载 `.sysupgrade.itb` 文件" >> $GITHUB_STEP_SUMMARY
+        echo "3. 使用 `sysupgrade` 命令刷入" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "---" >> $GITHUB_STEP_SUMMARY
+        echo "*构建时间: $(date)*" >> $GITHUB_STEP_SUMMARY
+
+    - name: 发送构建结果
+      if: failure()
+      run: |
+        echo "构建失败,请检查日志" && exit 1
