@@ -13,6 +13,7 @@ jobs:
           repository: padavanonly/immortalwrt-mt798x-6.6
           ref: openwrt-24.10-6.6  # 当前活跃分支（内核 6.6）
           path: immortalwrt
+          fetch-depth: 0
 
       - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
         run: |
@@ -32,6 +33,7 @@ jobs:
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+      
       - name: 缓存 staging_dir/
         uses: actions/cache@v5.0.3
         id: cache-staging
@@ -39,6 +41,12 @@ jobs:
           path: immortalwrt/staging_dir
           key: ${{ runner.os }}-immortalwrt-staging-${{ hashFiles('immortalwrt/feeds.conf.default') }}-${{ hashFiles('immortalwrt/.config') }}
           restore-keys: ${{ runner.os }}-immortalwrt-staging-
+
+      - name: add ubootmod-standard pathch
+        run: |
+         cp target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard.dts immortalwrt/target/linux/mediatek/dts/
+         batch scripts/apply_multi_version_patches.sh
+
 
       - name: 加载 Redmi AX6000 U-Boot 版本配置（ubootmod）
         working-directory: immortalwrt
