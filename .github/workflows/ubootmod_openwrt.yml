@@ -66,6 +66,13 @@ jobs:
           echo "=== 编译目标检查 ==="
           grep "CONFIG_TARGET_ROOTFS_SQUASHFS" .config || echo "警告: 未启用 squashfs"
           grep "CONFIG_TARGET_INITRAMFS_COMPRESSION_XZ" .config || echo "警告: 未启用 xz 压缩"
+          echo "=== 检查多设备配置 ==="
+          grep "CONFIG_TARGET_MULTI_PROFILE" .config
+          grep "CONFIG_TARGET_PER_DEVICE_ROOTFS" .config
+          echo "=== 检查启用的设备 ==="
+          grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000" .config | grep "=y"
+          echo "=== 检查 DTS 文件 ==="
+          ls -la target/linux/mediatek/dts/*ax6000*
 
       - name: 下载源码（加速后续编译）
         working-directory: immortalwrt
@@ -81,6 +88,10 @@ jobs:
         run: |
           echo "=== 编译产物列表 ==="
           find bin/targets/mediatek/filogic/ -type f -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" 2>/dev/null || echo "未找到编译产物"
+          echo "=== 检查三个版本的固件 ==="
+          ls -lh bin/targets/mediatek/filogic/*stock* || echo "stock 版本缺失"
+          ls -lh bin/targets/mediatek/filogic/*ubootmod.bin || echo "ubootmod 版本缺失"
+          ls -lh bin/targets/mediatek/filogic/*ubootmod-standard.bin || echo "ubootmod-standard 版本缺失"
           echo "=== 编译产物目录 ==="
           ls -lh bin/targets/mediatek/filogic/ || true
 
