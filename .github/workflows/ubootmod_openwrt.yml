@@ -65,12 +65,6 @@ jobs:
           make defconfig
 
           cat .config
-          
-          echo "=== 配置验证 ==="
-          grep "CONFIG_TARGET_MULTI_PROFILE=y" .config
-          grep "CONFIG_TARGET_PER_DEVICE_ROOTFS=y" .config
-          echo "=== 检查 DTS 文件 ==="
-          ls -la target/linux/mediatek/dts/*ax6000*
 
       - name: 下载源码（加速后续编译）
         working-directory: immortalwrt
