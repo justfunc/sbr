@@ -55,12 +55,17 @@ jobs:
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
         run: |
-          {
-            echo "CONFIG_CCACHE=y"
-            echo "# CONFIG_BINUTILS_USE_VERSION_2_42 is not set"
-            echo "CONFIG_BINUTILS_USE_VERSION_2_43=y"
-          } >> .config
+          cat >> .config << 'EOF'
+          CONFIG_CCACHE=y
+          CONFIG_BINUTILS_USE_VERSION_2_42 is not set
+          CONFIG_BINUTILS_USE_VERSION_2_43=y
+          CONFIG_TARGET_MULTI_PROFILE=y
+          CONFIG_TARGET_PER_DEVICE_ROOTFS=y
+          CONFIG_TARGET_MULTI_PROFILE=y
+          EOF
+
           make defconfig
+          
           echo "=== 配置验证 ==="
           grep "CONFIG_TARGET_MULTI_PROFILE=y" .config
           grep "CONFIG_TARGET_PER_DEVICE_ROOTFS=y" .config
