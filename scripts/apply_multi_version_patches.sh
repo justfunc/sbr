@@ -1,36 +1,21 @@
 #!/bin/bash
 
+TARGET_FILE="immortalwrt/target/linux/mediatek/image/filogic.mk"
+NEW_BLOCK="target/linux/mediatek/image/filogic_ax6000_ubootmod.mk"
 
-cat >> immortalwrt/target/linux/mediatek/image/filogic.mk << 'EOF'
+start_line=$(grep -nF "define Device/xiaomi_redmi-router-ax6000-ubootmod" "$TARGET_FILE" | cut -d: -f1)
+end_line=$(grep -nF "TARGET_DEVICES += xiaomi_redmi-router-ax6000-ubootmod" "$TARGET_FILE" | cut -d: -f1)
 
-define Device/xiaomi_redmi-router-ax6000-ubootmod-standard
-  DEVICE_VENDOR := Xiaomi
-  DEVICE_MODEL := Redmi Router AX6000
-  DEVICE_VARIANT := (OpenWrt U-Boot Standard)
-  DEVICE_DTS := mt7986a-xiaomi-redmi-router-ax6000-ubootmod-standard
-  DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-leds-ws2812b kmod-mt7915e kmod-mt7986-firmware mt7986-wo-firmware
-  KERNEL_INITRAMFS_SUFFIX := -recovery.itb
-  UBINIZE_OPTS := -E 5
-  BLOCKSIZE := 128k
-  PAGESIZE := 2048
-  KERNEL_IN_UBI := 1
-  UBOOTENV_IN_UBI := 1
-  KERNEL := kernel-bin | gzip
-  KERNEL_INITRAMFS := kernel-bin | lzma | \
-        fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
-  IMAGE/sysupgrade.itb := append-kernel | \
-        fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | append-metadata
-  ARTIFACTS := preloader.bin bl31-uboot.fip
-  ARTIFACT/preloader.bin := mt7986-bl2 spim-nand-ddr4
-  ARTIFACT/bl31-uboot.fip := mt7986-bl31-uboot xiaomi_redmi-router-ax6000
-ifeq ($(IB),)
-ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
-  ARTIFACTS += initramfs-factory.ubi
-  ARTIFACT/initramfs-factory.ubi := append-image-stage initramfs-recovery.itb | ubinize-kernel
-endif
-endif
-endef
-TARGET_DEVICES += xiaomi_redmi-router-ax6000-ubootmod-standard
+if [ -n "$start_line" ] && [ -n "$end_line" ]; then
+    # 先删除旧代码块，然后在原起始位置读入新文件内容
+    # 注意：在 Linux 上直接用 -i，在 macOS 上需用 -i ''
+    sed -i "${start_line},${end_line}d" "$TARGET_FILE"
+    sed -i "${start_line}r $NEW_BLOCK" "$TARGET_FILE"
+    echo "替换完成！"
+else
+    echo "错误：未能在文件中找到指定的开始或结束标记。"
+fi
 
-EOF
+cp -f target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
+
+cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
