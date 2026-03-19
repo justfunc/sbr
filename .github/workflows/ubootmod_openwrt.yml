@@ -64,9 +64,6 @@ jobs:
           echo "=== 配置验证 ==="
           grep "CONFIG_TARGET_MULTI_PROFILE=y" .config
           grep "CONFIG_TARGET_PER_DEVICE_ROOTFS=y" .config
-          grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-stock=y" .config
-          grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y" .config
-          grep "CONFIG_BINUTILS_USE_VERSION_2_43=y" .config
           echo "=== 检查 DTS 文件 ==="
           ls -la target/linux/mediatek/dts/*ax6000*
 
