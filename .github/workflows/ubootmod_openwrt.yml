@@ -60,7 +60,6 @@ jobs:
           CONFIG_BINUTILS_USE_VERSION_2_43=y
           CONFIG_TARGET_MULTI_PROFILE=y
           CONFIG_TARGET_PER_DEVICE_ROOTFS=y
-          CONFIG_TARGET_MULTI_PROFILE=y
           EOF
 
           make defconfig
