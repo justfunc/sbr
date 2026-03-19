@@ -8,12 +8,6 @@
 	compatible = "xiaomi,redmi-router-ax6000-ubootmod", "mediatek,mt7986a";
 };
 
-&spi_nand_flash {
-        mediatek,nmbm;
-        mediatek,bmt-max-ratio = <1>;
-        mediatek,bmt-max-reserved-blocks = <64>;
-};
-
 &chosen {
 	rootdisk = <&ubi_rootdisk>;
 	bootargs-append = " root=/dev/fit0 rootwait";
