@@ -77,7 +77,9 @@ jobs:
 
       - name: 开始编译 stock + ubootmod 固件
         working-directory: immortalwrt
-        run: make -j$(nproc) V=s 2>&1 | tee build.log
+        run: |
+          set -o pipefail
+          make -j$(nproc) V=s 2>&1 | tee build.log
 
       - name: 检查编译产物
         working-directory: immortalwrt
