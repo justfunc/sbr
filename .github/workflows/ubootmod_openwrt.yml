@@ -52,7 +52,7 @@ jobs:
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
         run: |
-          cp defconfig/mt7986-ax6000.config .config
+          cp ../defconfig/mt7986-ax6000-ubootmod.config .config
           {
             echo "CONFIG_CCACHE=y"
             echo "# CONFIG_BINUTILS_USE_VERSION_2_42 is not set"
