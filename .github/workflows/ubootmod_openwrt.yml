@@ -49,24 +49,22 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-      - name: 缓存 staging_dir/
-        uses: actions/cache@v5.0.3
-        id: cache-staging
-        with:
-          path: immortalwrt/staging_dir
-          key: ${{ runner.os }}-immortalwrt-staging-${{ hashFiles('immortalwrt/feeds.conf.default') }}
-
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
         run: |
           cp defconfig/mt7986-ax6000.config .config
-          echo "CONFIG_CCACHE=y" >> .config
+          {
+            echo "CONFIG_CCACHE=y"
+            echo "# CONFIG_BINUTILS_USE_VERSION_2_42 is not set"
+            echo "CONFIG_BINUTILS_USE_VERSION_2_43=y"
+          } >> .config
           make defconfig
           echo "=== 配置验证 ==="
           grep "CONFIG_TARGET_MULTI_PROFILE=y" .config
           grep "CONFIG_TARGET_PER_DEVICE_ROOTFS=y" .config
           grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-stock=y" .config
           grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y" .config
+          grep "CONFIG_BINUTILS_USE_VERSION_2_43=y" .config
           echo "=== 检查 DTS 文件 ==="
           ls -la target/linux/mediatek/dts/*ax6000*
 
@@ -125,8 +123,10 @@ jobs:
         if: failure()
         working-directory: immortalwrt
         run: |
-          echo "=== 编译失败，检查最后 100 行日志 ==="
-          tail -100 build.log
+          echo "=== 编译失败，检查最后 200 行日志 ==="
+          tail -200 build.log || true
+          echo "=== build.log 中的 error/fatal 关键信息 ==="
+          grep -niE "error:|fatal:|collect2:|Killed signal|No rule to make target|undefined reference" build.log | tail -50 || true
           echo "=== 最终 .config 中的 AX6000 设备 ==="
           grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000" .config || true
           echo "=== 当前编译目录 ==="
