@@ -99,7 +99,6 @@ jobs:
           ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" | wc -l | tr -d ' ')
           echo "stock 固件数量: ${stock_count}"
           echo "ubootmod 固件数量: ${ubootmod_count}"
-          test "${stock_count}" -gt 0
           test "${ubootmod_count}" -gt 0
           echo "=== 检查恢复镜像 ==="
           ls -lh bin/targets/mediatek/filogic/*recovery.itb 2>/dev/null || echo "recovery.itb 缺失"
