@@ -70,10 +70,11 @@ jobs:
           CONFIG_BINUTILS_USE_VERSION_2_43=y
           CONFIG_TARGET_PER_DEVICE_ROOTFS=y
           EOF
-
+          
+          scripts/diffconfig.sh > seed.config
+          cat seed.config
+          
           make defconfig
-
-          cat .config
 
       - name: 下载源码（加速后续编译）
         working-directory: immortalwrt
