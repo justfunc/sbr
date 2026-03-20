@@ -41,8 +41,8 @@ jobs:
 
       - name: 只覆盖 ubootmod 分区 DTS
         run: |
-          cp defconfig/${{ github.event.inputs.config_file }} .config
           bash scripts/apply_multi_version_patches.sh
+          cp defconfig/${{ github.event.inputs.config_file }} immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
