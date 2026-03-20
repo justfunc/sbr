@@ -22,5 +22,3 @@ cat "$NEW_BLOCK" >> "$TARGET_FILE"
 echo "替换与追加完成！"
 
 cp -f target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
-
-cp defconfig/mt7986a-ax6000-ubootmod.config immortalwrt/.config
