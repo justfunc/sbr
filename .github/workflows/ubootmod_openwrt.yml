@@ -2,9 +2,9 @@ name: Build Redmi AX6000 Stock + U-BootMod
 
 on:
   workflow_dispatch:  # 手动触发（推荐）
-  inputs:
-    config_file:
-      description: "选择配置文件"
+    inputs:
+      config_file:
+        description: "选择配置文件"
         required: true
         default: "mt7986a-ax6000-ubootmod.config"
         type: choice
