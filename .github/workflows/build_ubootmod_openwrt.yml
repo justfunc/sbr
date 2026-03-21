@@ -23,6 +23,16 @@ jobs:
       - name: Check out
         uses: actions/checkout@v6.0.2
 
+      - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
+        run: |
+          sudo apt-get update
+          sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+          sudo makedir immortalwrt
+          sudo chown $USER:$GROUPS immortalwrt
+
       - name: 检出最新代码（padavanonly/immortalwrt-mt798x-6.6）
         uses: actions/checkout@v6.0.2
         with:
@@ -31,13 +41,7 @@ jobs:
           path: immortalwrt
           fetch-depth: 0
 
-      - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
-        run: |
-          sudo apt-get update
-          sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
-          sudo -E apt-get -qq autoremove --purge
-          sudo -E apt-get -qq clean
-          sudo timedatectl set-timezone "$TZ"
+
 
       - name: 准备构建环境
         run: |
@@ -46,35 +50,12 @@ jobs:
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
-         
-      - name: 缓存 dl/
-        uses: actions/cache@v5.0.3
-        id: cache-dl
-        with:
-          path: immortalwrt/dl
-          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/feeds.conf.default') }}
-
-      - name: 缓存 feeds/
-        uses: actions/cache@v5.0.3
-        id: cache-feeds
-        with:
-          path: immortalwrt/feeds
-          key: ${{ runner.os }}-immortalwrt-feeds-${{ hashFiles('immortalwrt/feeds.conf.default') }}
-
-      - name: 缓存 staging_dir/
-        uses: actions/cache@v5.0.3
-        with:
-          path: immortalwrt/staging_dir
-          key: ${{ runner.os }}-immortalwrt-staging-${{ runner.os }}-${{ hashFiles('immortalwrt/.config') }}
-          restore-keys: |
-            ${{ runner.os }}-immortalwrt-staging-${{ runner.os }}-
 
       - name: 更新 feeds 并安装
         working-directory: immortalwrt
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-        if: steps.cache-dl.outputs.cache-hit != 'true' || steps.cache-feeds.outputs.cache-hit != 'true'
 
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
