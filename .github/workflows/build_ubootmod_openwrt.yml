@@ -50,14 +50,14 @@ jobs:
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
-          bash scripts/cust_packages.sh
 
       - name: 更新 feeds 并安装
         working-directory: immortalwrt
         run: |
+          bash $GITHUB_WORKSPACE/scripts/cust_packages.sh
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          bash scripts/cust_init_settings.sh
+          bash $GITHUB_WORKSPACE/scripts/cust_init_settings.sh
 
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
