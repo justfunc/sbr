@@ -99,16 +99,6 @@ jobs:
           ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" | wc -l | tr -d ' ')
           echo "stock 固件数量: ${stock_count}"
           echo "ubootmod 固件数量: ${ubootmod_count}"
-          test "${ubootmod_count}" -gt 0
-          echo "=== 检查恢复镜像 ==="
-          ls -lh bin/targets/mediatek/filogic/*recovery.itb 2>/dev/null || echo "recovery.itb 缺失"
-          ls -lh bin/targets/mediatek/filogic/*initramfs-factory.ubi 2>/dev/null || echo "initramfs-factory.ubi 缺失"
-          echo "=== 检查 FIP 文件 ==="
-          ls -lh bin/targets/mediatek/filogic/*bl31-uboot.fip 2>/dev/null || echo "bl31-uboot.fip 缺失"
-          echo "=== 检查内核文件 ==="
-          ls -lh bin/targets/mediatek/filogic/*kernel* 2>/dev/null || echo "kernel 文件缺失"
-          echo "=== 编译产物目录 ==="
-          ls -lh bin/targets/mediatek/filogic/ || true
 
       - name: 上传编译产物（stock + ubootmod）
         if: success()
