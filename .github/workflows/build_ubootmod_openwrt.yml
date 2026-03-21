@@ -57,11 +57,11 @@ jobs:
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+          bash scripts/cust_init_settings.sh
 
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
         run: |
-          bash scripts/cust_init_settings.sh
           cat >> .config << 'EOF'
           CONFIG_CCACHE=y
           # CONFIG_BINUTILS_USE_VERSION_2_42 is not set
