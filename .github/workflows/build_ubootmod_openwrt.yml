@@ -45,8 +45,8 @@ jobs:
 
       - name: 准备构建环境
         run: |
-          bash scripts/apply_ubootmod_patches.sh
-          cp defconfig/${{ github.event.inputs.config_file }} immortalwrt/.config
+          bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
+          cp $GITHUB_WORKSPACE/defconfig/${{ github.event.inputs.config_file }} immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
