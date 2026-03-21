@@ -39,15 +39,14 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
 
-      - name: 只覆盖 ubootmod 分区 DTS
+      - name: 准备构建环境
         run: |
-          bash scripts/apply_multi_version_patches.sh
+          bash scripts/apply_ubootmod_patches.sh
           cp defconfig/${{ github.event.inputs.config_file }} immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
          
-
       - name: 缓存 dl/
         uses: actions/cache@v5.0.3
         id: cache-dl
@@ -55,11 +54,27 @@ jobs:
           path: immortalwrt/dl
           key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/feeds.conf.default') }}
 
+      - name: 缓存 feeds/
+        uses: actions/cache@v5.0.3
+        id: cache-feeds
+        with:
+          path: immortalwrt/feeds
+          key: ${{ runner.os }}-immortalwrt-feeds-${{ hashFiles('immortalwrt/feeds.conf.default') }}
+
+      - name: 缓存 staging_dir/
+        uses: actions/cache@v5.0.3
+        with:
+          path: immortalwrt/staging_dir
+          key: ${{ runner.os }}-immortalwrt-staging-${{ runner.os }}-${{ hashFiles('immortalwrt/.config') }}
+          restore-keys: |
+            ${{ runner.os }}-immortalwrt-staging-${{ runner.os }}-
+
       - name: 更新 feeds 并安装
         working-directory: immortalwrt
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+        if: steps.cache-dl.outputs.cache-hit != 'true' || steps.cache-feeds.outputs.cache-hit != 'true'
 
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
@@ -79,9 +94,13 @@ jobs:
       - name: 下载源码（加速后续编译）
         working-directory: immortalwrt
         run: |
-          make download -j$(nproc) || true
+          make download -j$(nproc) || {
+            echo "首次下载失败，重试中..."
+            make download -j1 || true
+          }
 
       - name: 开始编译 stock + ubootmod 固件
+        timeout-minutes: 100
         working-directory: immortalwrt
         run: |
           set -o pipefail
@@ -106,15 +125,10 @@ jobs:
         with:
           name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
           path: |
-            immortalwrt/bin/targets/mediatek/filogic/*squashfs*
-            immortalwrt/bin/targets/mediatek/filogic/*recovery.itb
-            immortalwrt/bin/targets/mediatek/filogic/*initramfs-factory.ubi
-            immortalwrt/bin/targets/mediatek/filogic/*bl31-uboot.fip
-            immortalwrt/bin/targets/mediatek/filogic/*preloader.bin
-            immortalwrt/bin/targets/mediatek/filogic/*kernel*
-            immortalwrt/bin/targets/mediatek/filogic/*.manifest
-          retention-days: 30
+            immortalwrt/bin/targets/mediatek/filogic/*
+          retention-days: 15
           if-no-files-found: warn
+          compression-level: 6
 
       - name: 检查编译日志
         if: failure()
@@ -128,6 +142,16 @@ jobs:
           grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000" .config || true
           echo "=== 当前编译目录 ==="
           ls -lh bin/targets/mediatek/filogic/ || true
+
+      - name: 生成构建摘要
+        if: always()
+        run: |
+          echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 运行编号: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          if [ -f immortalwrt/build.log ]; then
+            echo "- 编译日志行数: $(wc -l < immortalwrt/build.log)" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: 清理缓存（可选，节省空间）
         if: always()
