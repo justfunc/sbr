@@ -117,8 +117,8 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH --single-branch openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        git clone $REPO_URL -b $REPO_BRANCH --single-branch immortalwrt
+        ln -sf /workdir/immortalwrt $GITHUB_WORKSPACE/immortalwrt
     
     - name: 准备构建环境
       run: |
@@ -130,27 +130,27 @@ jobs:
 
     # 4. 更新并安装 Feeds
     - name: Update feeds （Feeds更新）
-      run: cd openwrt && ./scripts/feeds update -a
+      run: cd immortalwrt && ./scripts/feeds update -a
 
     - name: Install feeds （Feeds安装）
-      run: cd openwrt && ./scripts/feeds install -a
+      run: cd immortalwrt && ./scripts/feeds install -a
 
     # 5. 加载自定义 Feeds (diy-part1.sh)
     - name: Load custom feeds （加载自定义 Feeds）
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
-        cd openwrt
+        cd immortalwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
     # 6. 加载自定义配置 (diy-part2.sh)
     - name: Load custom configuration （加载自定义配置diy-part2）
       run: |
-        [ -e files ] && mv files openwrt/files
+        [ -e files ] && mv files immortalwrt/files
         CFG_FILE="defconfig/${{github.event.inputs.config_file}}"
-        [ -e $CFG_FILE ] && mv $CFG_FILE openwrt/.config
+        [ -e $CFG_FILE ] && mv $CFG_FILE immortalwrt/.config
         chmod +x $DIY_P2_SH
-        cd openwrt
+        cd immortalwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
     # 7. SSH 调试 (可选)
@@ -164,7 +164,7 @@ jobs:
     - name: Download package （下载软件包）
       id: package
       run: |
-        cd openwrt
+        cd immortalwrt
         make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
@@ -174,7 +174,7 @@ jobs:
     - name: Compile the firmware （编译固件）
       id: compile
       run: |
-        cd openwrt
+        cd immortalwrt
         echo "开始编译..."
         df -hT /
         
@@ -198,26 +198,26 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
-        name: OpenWrt_bin_${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: immortalwrt_bin_${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: |
-          openwrt/bin
+          immortalwrt/bin
 
     # 11. 整理固件文件
     - name: Organize files （整理固件文件）
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
-        cd openwrt/bin/targets/*/*
+        cd immortalwrt/bin/targets/*/*
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
     # 12. 上传固件目录 (Artifacts)
-    - name: Upload OpenWrt_firmware directory （上传固件目录）
+    - name: Upload immortalwrt_firmware directory （上传固件目录）
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: OpenWrt_firmware_${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: immortalwrt_firmware_${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
     # 13. 上传到 CowTransfer (可选)
@@ -256,7 +256,7 @@ jobs:
         echo "release_tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
         
         touch release.txt
-        echo "## 🚀 OpenWrt 自动编译固件" >> release.txt
+        echo "## 🚀 immortalwrt 自动编译固件" >> release.txt
         echo "" >> release.txt
         echo "### 📋 编译信息" >> release.txt
         echo "| 项目 | 详情 |" >> release.txt
