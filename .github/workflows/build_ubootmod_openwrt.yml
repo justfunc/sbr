@@ -1,4 +1,4 @@
-name: Build Redmi AX6000 Stock + U-BootMod
+name: Build Immortalwrt-24.10-6.6_redmi-ax6000-ubootmod
 
 on:
   workflow_dispatch:  # 手动触发（推荐）
