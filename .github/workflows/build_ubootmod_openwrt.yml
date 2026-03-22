@@ -127,12 +127,11 @@ jobs:
       - name: 上传编译产物（stock + ubootmod）
         if: success()
         uses: actions/upload-artifact@v7.0.0
-        working-directory: immortalwrt
         with:
           name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
           path: |
-            bin/targets/mediatek/filogic/*
-            .config
+            immortalwrt/bin/targets/mediatek/filogic/*
+            immortalwrt/.config
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
