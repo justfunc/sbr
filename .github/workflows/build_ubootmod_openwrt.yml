@@ -67,7 +67,6 @@ jobs:
       - name: SSH connection to Actions
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh_enabled }}
-        timeout-minutes: 5
         with:
           limit-access-to-actor: true
 
