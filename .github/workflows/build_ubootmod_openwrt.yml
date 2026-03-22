@@ -122,7 +122,7 @@ jobs:
           bash $GITHUB_WORKSPACE/$DIY_P2_SH
       
       - name: SSH connection to Actions
-        uses: mxschmitt/action-tmate@v3.23
+        uses: mxschmitt/action-tmate@main
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh_enabled }}
         with:
           limit-access-to-actor: true
@@ -165,11 +165,11 @@ jobs:
 
       - name: 上传编译产物（stock + ubootmod）
         if: success()
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@main
         with:
           name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
           path: |
-            immortalwrt/bin/targets/mediatek/filogic/*
+            immortalwrt/bin
             immortalwrt/seed.config
           retention-days: 15
           if-no-files-found: warn
