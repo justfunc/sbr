@@ -9,9 +9,9 @@ on:
         default: "mt7986a-ax6000-ubootmod.config"
         type: choice
         options:
+          - "redmi-ax6000-24_10_6_6.config"
           - "mt7986a-ax6000-ubootmod.config"
           - "ax6000_ubootmod.config"
-          - "redmi-ax6000-24_10_6_6.config"
       ssh_enabled:
         description: "是否开启 SSH"
         required: false
