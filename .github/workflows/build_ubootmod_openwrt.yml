@@ -11,7 +11,7 @@ on:
         options:
           - "mt7986a-ax6000-ubootmod.config"
           - "ax6000_ubootmod.config"
-      ssh:
+      ssh_enabled:
         description: "是否开启 SSH"
         required: false
         default: false
@@ -66,7 +66,7 @@ jobs:
 
       - name: SSH connection to Actions
         uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh_enabled }}
         timeout-minutes: 5
 
       - name: 加载 Redmi AX6000 原仓库配置
