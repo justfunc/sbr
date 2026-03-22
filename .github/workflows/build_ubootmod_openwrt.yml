@@ -11,6 +11,14 @@ on:
         options:
           - "mt7986a-ax6000-ubootmod.config"
           - "ax6000_ubootmod.config"
+      ssh:
+        description: "是否开启 SSH"
+        required: false
+        default: false
+        type: boolean
+        options:
+          - true
+          - false
 
 env:
   TZ: Asia/Shanghai
@@ -58,6 +66,11 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           bash $GITHUB_WORKSPACE/scripts/cust_init_settings.sh
+
+      - name: SSH connection to Actions
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        timeout-minutes: 5
 
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
@@ -109,6 +122,7 @@ jobs:
           name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic/*
+            immortalwrt/.config
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
