@@ -170,7 +170,7 @@ jobs:
           name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic/*
-            immortalwrt/.config
+            immortalwrt/seed.config
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
