@@ -69,9 +69,9 @@ UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 # UPDATE_PACKAGE "passwall-packages" "Openwrt-Passwall/openwrt-passwall-packages" "main" 
 
 # 常用工具与应用
-UPDATE_PACKAGE "netspeedtest" "sirpdboy/luci-app-netspeedtest" "master" "" "homebox speedtest"  #homebox speedtest测速
-UPDATE_PACKAGE "poweroffdevice" "sirpdboy/luci-app-poweroffdevice" "js"   #关机
-UPDATE_PACKAGE "taskplan" "sirpdboy/luci-app-taskplan" "master"    #计划任务
+UPDATE_PACKAGE "netspeedtest" "sirpdboy/luci-app-netspeedtest" "main" "" "homebox speedtest"  #homebox speedtest测速
+UPDATE_PACKAGE "poweroffdevice" "sirpdboy/luci-app-poweroffdevice" "master"   #关机
+UPDATE_PACKAGE "taskplan" "sirpdboy/luci-app-taskplan" "main"    #计划任务
 # UPDATE_PACKAGE "watchdog" "sirpdboy/luci-app-watchdog" "main"  #看门狗
 UPDATE_PACKAGE "advancedplus" "sirpdboy/luci-app-advancedplus" "main"  #高级设置
 UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"  #分区助手

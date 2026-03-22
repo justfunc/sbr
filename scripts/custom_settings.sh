@@ -4,6 +4,20 @@ echo "=========================================="
 echo "执行自定义优化脚本 (cust_init_settings.sh)"
 echo "=========================================="
 
+
+# Modify default IP
+sed -i 's/192.168.6.1/192.168.1.254/g' package/base-files/files/bin/config_generate
+
+# Modify default theme
+sed -i 's/luci-theme-bootstrap/luci-theme-aurora/g' feeds/luci/collections/luci/Makefile
+
+# Modify hostname
+sed -i 's/ImmortalWrt/gwrt/g' package/base-files/files/bin/config_generate
+
+# add date in output file name
+sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d)' \
+       -e '/^IMG_PREFIX:=/ s/\($(SUBTARGET)\)/\1-$(BUILD_DATE)/' include/image.mk
+
 # ---------------------------------------------------------
 # libxcrypt 专项救治 (极致精简版)
 # ---------------------------------------------------------
@@ -37,16 +51,3 @@ if [ -f "$RUST_FILE" ]; then
 
 	cd $PKG_PATH && echo "rust has been fixed!"
 fi
-
-# Modify default IP
-sed -i 's/192.168.6.1/192.168.1.254/g' package/base-files/files/bin/config_generate
-
-# Modify default theme
-sed -i 's/luci-theme-bootstrap/luci-theme-aurora/g' feeds/luci/collections/luci/Makefile
-
-# Modify hostname
-sed -i 's/ImmortalWrt/gwrt/g' package/base-files/files/bin/config_generate
-
-# add date in output file name
-sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d)' \
-       -e '/^IMG_PREFIX:=/ s/\($(SUBTARGET)\)/\1-$(BUILD_DATE)/' include/image.mk
