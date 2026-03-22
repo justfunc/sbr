@@ -21,7 +21,7 @@ UPDATE_PACKAGE() {
 		# 查找匹配的目录
 		echo "pwd- $(pwd)"
 		echo "Search directory: $NAME"
-		local FOUND_DIRS=$(find ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "*$NAME*" 2>/dev/null)
+		local FOUND_DIRS=$(find feeds/luci/ feeds/packages/ -maxdepth 3 -type d -iname "*$NAME*" 2>/dev/null)
 
 		# 删除找到的目录
 		if [ -n "$FOUND_DIRS" ]; then
@@ -87,7 +87,7 @@ UPDATE_PACKAGE "owq-wol" "isalikai/luci-app-owq-wol" "main"  # wol加强版
 UPDATE_VERSION() {
 	local PKG_NAME=$1
 	local PKG_MARK=${2:-false}
-	local PKG_FILES=$(find ./ ../feeds/packages/ -maxdepth 3 -type f -wholename "*/$PKG_NAME/Makefile")
+	local PKG_FILES=$(find ./ feeds/packages/ -maxdepth 3 -type f -wholename "*/$PKG_NAME/Makefile")
 
 	if [ -z "$PKG_FILES" ]; then
 		echo "$PKG_NAME not found!"
