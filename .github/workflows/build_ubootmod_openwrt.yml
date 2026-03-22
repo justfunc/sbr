@@ -6,7 +6,7 @@ on:
       config_file:
         description: "选择配置文件"
         required: true
-        default: "mt7986a-ax6000-ubootmod.config"
+        default: "redmi-ax6000-24_10_6_6.config"
         type: choice
         options:
           - "redmi-ax6000-24_10_6_6.config"
