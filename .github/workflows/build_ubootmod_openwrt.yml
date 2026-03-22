@@ -68,6 +68,8 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh_enabled }}
         timeout-minutes: 5
+        with:
+          limit-access-to-actor: true
 
       - name: 加载 Redmi AX6000 原仓库配置
         working-directory: immortalwrt
