@@ -31,7 +31,7 @@ jobs:
       - name: 输入参数
         run: |
           echo "输入参数："
-          echo "  配置文件: ${{ CONFIG_FILE }}"
+          echo "  配置文件: $CONFIG_FILE"
           echo "  开启 SSH: ${{ github.event.inputs.ssh_enabled }}"
 
       - name: Check out
