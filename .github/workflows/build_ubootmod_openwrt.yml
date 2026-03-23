@@ -23,7 +23,6 @@ env:
   DIY_P2_SH: scripts/custom_settings.sh
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
-  SSH_ENABLED: ${{ github.event.inputs.ssh_enabled }}
 
 jobs:
   build:
@@ -34,7 +33,7 @@ jobs:
         run: |
           echo "输入参数："
           echo "  配置文件: ${CONFIG_FILE}"
-          echo "  开启 SSH: ${SSH_ENABLED}"
+          echo "  开启 SSH: ${{inputs.ssh_enabled}}"
 
       - name: Check out
         uses: actions/checkout@main
@@ -132,7 +131,7 @@ jobs:
       
       - name: SSH 连接（可选）
         uses: mxschmitt/action-tmate@v3.23
-        if: ${{ github.event_name == 'workflow_dispatch' && env.SSH_ENABLED }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh_enabled }}
         with:
           limit-access-to-actor: true
 
