@@ -132,7 +132,7 @@ jobs:
       
       - name: SSH 连接（可选）
         uses: mxschmitt/action-tmate@v3.23
-        if: ${{ github.event_name == 'workflow_dispatch' && SSH_ENABLED }}
+        if: ${{ github.event_name == 'workflow_dispatch' && $SSH_ENABLED }}
         with:
           limit-access-to-actor: true
 
