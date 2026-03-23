@@ -97,24 +97,24 @@ jobs:
           path: immortalwrt
           fetch-depth: 0
 
-      - name: 准备构建环境
+      - name: 应用 ubootmod 补丁
         run: |
           bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
           cp $GITHUB_WORKSPACE/defconfig/${{ github.event.inputs.config_file }} immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
+      
+      - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
+        working-directory: immortalwrt
+        run: |
+          bash $GITHUB_WORKSPACE/$DIY_P1_SH
 
       - name: 更新 feeds 并安装
         working-directory: immortalwrt
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-
-      - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
-        working-directory: immortalwrt
-        run: |
-          bash $GITHUB_WORKSPACE/$DIY_P1_SH
 
       - name: Load custom configuration （加载自定义配置 custom_settings.sh）
         working-directory: immortalwrt
