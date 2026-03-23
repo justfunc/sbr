@@ -121,8 +121,8 @@ jobs:
         run: |
           bash $GITHUB_WORKSPACE/$DIY_P2_SH
       
-      - name: SSH connection to Actions
-        uses: mxschmitt/action-tmate@main
+      - name: SSH 连接（可选）
+        uses: mxschmitt/action-tmate@v3.23
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh_enabled }}
         with:
           limit-access-to-actor: true
