@@ -6,7 +6,7 @@ on:
       config_file:
         description: "选择配置文件"
         required: true
-        default: "redmi-ax6000-24_10_6_6.config"
+        default: "redmi-ax6000-24_10_6_6"
         type: choice
         options:
           - "redmi-ax6000-24_10_6_6"
@@ -100,9 +100,9 @@ jobs:
 
       - name: 应用 ubootmod 补丁
         run: |
-          bash ${{GITHUB_WORKSPACE}}/scripts/apply_ubootmod_patches.sh
+          bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
           [ -e files ] && mv files immortalwrt/files
-          cp ${{GITHUB_WORKSPACE}}/$CONFIG_FILE immortalwrt/.config
+          cp $GITHUB_WORKSPACE/$CONFIG_FILE immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
