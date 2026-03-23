@@ -11,7 +11,7 @@
 rm -rf package/luci-theme-argon
 git clone --depth=1 https://github.com/sbwml/luci-theme-argon package/luci-theme-argon
 rm -rf package/luci-theme-aurora
-git clone --depth=1 https://github.com/eamonxg/luci-theme-aurora" package/luci-theme-aurora
+git clone --depth=1 https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
 rm -rf package/luci-app-aurora-config
 git clone --depth=1 https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
 rm -rf package/luci-theme-kucat
@@ -37,4 +37,3 @@ rm -rf package/luci-app-wolplus
 git clone --depth=1 https://github.com/VIKINGYFY/packages package/luci-app-wolplus
 rm -rf package/luci-app-owq-wol
 git clone --depth=1 https://github.com/isalikai/luci-app-owq-wol package/luci-app-owq-wol  # wol加强版
-
