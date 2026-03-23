@@ -9,9 +9,9 @@ on:
         default: "redmi-ax6000-24_10_6_6.config"
         type: choice
         options:
-          - "redmi-ax6000-24_10_6_6.config"
-          - "mt7986a-ax6000-ubootmod.config"
-          - "ax6000_ubootmod.config"
+          - "redmi-ax6000-24_10_6_6"
+          - "mt7986a-ax6000-ubootmod"
+          - "ax6000_ubootmod"
       ssh_enabled:
         description: "是否开启 SSH"
         required: false
@@ -22,6 +22,7 @@ env:
   DIY_P1_SH: scripts/custom_feeds.sh
   DIY_P2_SH: scripts/custom_settings.sh
   TZ: Asia/Shanghai
+  CONFIG_FILE: ${{GITHUB_WORKSPACE}}/defconfig/${{ github.event.inputs.config_file }}.config
 
 jobs:
   build:
@@ -101,7 +102,7 @@ jobs:
         run: |
           bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
           [ -e files ] && mv files immortalwrt/files
-          cp $GITHUB_WORKSPACE/defconfig/${{ github.event.inputs.config_file }} immortalwrt/.config
+          cp $CONFIG_FILE immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
