@@ -118,10 +118,14 @@ jobs:
         run: |
           bash $GITHUB_WORKSPACE/$DIY_P1_SH
 
-      - name: 更新 feeds 并安装
+      - name: 更新 feeds
         working-directory: immortalwrt
         run: |
           ./scripts/feeds update -a
+  
+      - name: 安装 feeds
+        working-directory: immortalwrt
+        run: |
           ./scripts/feeds install -a
 
       - name: Load custom configuration （加载自定义配置 custom_settings.sh）
@@ -140,7 +144,6 @@ jobs:
         run: |
           scripts/diffconfig.sh > seed.config
           cat seed.config
-          
           make defconfig
 
       - name: 下载源码（加速后续编译）
