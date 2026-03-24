@@ -21,7 +21,7 @@ env:
   DIY_P2_SH: scripts/custom_settings.sh
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
-  FEEDS_CONF: feeds.conf.default
+  FEEDS_CONF: 25-12-feeds.conf
   REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase.git
   REPO_BRANCH: 25.12-dev
 
@@ -57,6 +57,7 @@ jobs:
         run: |
           git clone --depth 1 --single-branch -b $REPO_BRANCH $REPO_URL immortalwrt
           [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
+          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
 
       # - name: 应用 ubootmod 补丁
       #   run: |
