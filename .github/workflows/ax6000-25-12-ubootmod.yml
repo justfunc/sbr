@@ -1,0 +1,177 @@
+name: Immortalwrt-25.12_redmi-ax6000-ubootmod Build
+
+on:
+  workflow_dispatch:  # 手动触发（推荐）
+    inputs:
+      config_file:
+        description: "选择配置文件"
+        required: true
+        default: "ax6000-immortalwrt-25-12"
+        type: choice
+        options:
+          - "ax6000-immortalwrt-25-12"
+      ssh_enabled:
+        description: "是否开启 SSH"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DIY_P1_SH: scripts/custom_feeds.sh
+  DIY_P2_SH: scripts/custom_settings.sh
+  TZ: Asia/Shanghai
+  CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
+  FEEDS_CONF: feeds.conf.default
+  REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
+  REPO_BRANCH: 25.12-dev
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04  # OpenWrt 推荐版本，稳定性高
+    steps:
+
+      - name: 输入参数
+        run: |
+          echo "输入参数："
+          echo "  配置文件: ${CONFIG_FILE}"
+          echo "  开启 SSH: ${{inputs.ssh_enabled}}"
+
+      - name: Check out
+        uses: actions/checkout@main
+
+      - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
+        run: |
+         
+          sudo -E apt -yqq purge firefox
+          sudo -E apt -yqq update
+          sudo -E apt -yqq full-upgrade
+          
+          # 添加 clang llvm npm 依赖
+          sudo apt -yqq install dos2unix libfuse-dev clang llvm npm
+          # 添加 pnpm 依赖
+          sudo npm install -g pnpm
+          sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
+          sudo apt-get -qq autoremove --purge
+          sudo apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir immortalwrt
+          sudo chown $USER:$GROUPS immortalwrt
+          echo "初始磁盘空间:"
+          df -hT
+
+      - name: 检出最新代码
+        run: |
+          git clone --depth 1 --single-branch -b $REPO_BRANCH $REPO_URL immortalwrt
+          [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
+
+      # - name: 应用 ubootmod 补丁
+      #   run: |
+      #     bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
+      #     [ -e files ] && mv files immortalwrt/files
+      #     [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
+      #     echo "=== 当前 AX6000 DTS ==="
+      #     cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
+      #     grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
+      #     [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
+      # - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
+      #   working-directory: immortalwrt
+      #   run: |
+      #     bash $GITHUB_WORKSPACE/$DIY_P1_SH
+
+      - name: 更新 feeds
+        working-directory: immortalwrt
+        run: |
+          ./scripts/feeds update -a
+  
+      - name: 安装 feeds
+        working-directory: immortalwrt
+        run: |
+          ./scripts/feeds install -a
+
+      # - name: Load custom configuration （加载自定义配置 custom_settings.sh）
+      #   working-directory: immortalwrt
+      #   run: |
+      #     bash $GITHUB_WORKSPACE/$DIY_P2_SH
+      
+      - name: SSH 连接（可选）
+        uses: mxschmitt/action-tmate@v3.23
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh_enabled }}
+        with:
+          limit-access-to-actor: true
+
+      - name: 加载 Redmi AX6000 原仓库配置
+        working-directory: immortalwrt
+        run: |
+          scripts/diffconfig.sh > seed.config
+          cat seed.config
+          make defconfig
+
+      - name: 下载源码（加速后续编译）
+        working-directory: immortalwrt
+        run: |
+          make download -j$(nproc) || {
+            echo "首次下载失败，重试中..."
+            make download -j1 || true
+          }
+
+      - name: 开始编译 stock + ubootmod 固件
+        timeout-minutes: 100
+        working-directory: immortalwrt
+        run: |
+          set -o pipefail
+          make -j$(nproc) V=s 2>&1 | tee build.log
+
+      - name: 检查编译产物
+        working-directory: immortalwrt
+        run: |
+          echo "=== 编译产物列表 ==="
+          find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
+          echo "=== 检查 stock 和 ubootmod 固件 ==="
+          ls -lh bin/targets/mediatek/filogic/*stock* 2>/dev/null || echo "stock 版本缺失"
+          ls -lh bin/targets/mediatek/filogic/*ubootmod* 2>/dev/null || echo "ubootmod 版本缺失"
+          stock_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*stock*" | wc -l | tr -d ' ')
+          ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" | wc -l | tr -d ' ')
+          echo "stock 固件数量: ${stock_count}"
+          echo "ubootmod 固件数量: ${ubootmod_count}"
+
+      - name: 上传编译产物（stock + ubootmod）
+        if: success()
+        uses: actions/upload-artifact@main
+        with:
+          name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
+          path: |
+            immortalwrt/bin
+            immortalwrt/seed.config
+          retention-days: 15
+          if-no-files-found: warn
+          compression-level: 6
+
+      - name: 检查编译日志
+        if: failure()
+        working-directory: immortalwrt
+        run: |
+          echo "=== 编译失败，检查最后 200 行日志 ==="
+          tail -200 build.log || true
+          echo "=== build.log 中的 error/fatal 关键信息 ==="
+          grep -niE "error:|fatal:|collect2:|Killed signal|No rule to make target|undefined reference" build.log | tail -50 || true
+          echo "=== 最终 .config 中的 AX6000 设备 ==="
+          grep "CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000" .config || true
+          echo "=== 当前编译目录 ==="
+          ls -lh bin/targets/mediatek/filogic/ || true
+
+      - name: 生成构建摘要
+        if: always()
+        run: |
+          echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 运行编号: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          if [ -f immortalwrt/build.log ]; then
+            echo "- 编译日志行数: $(wc -l < immortalwrt/build.log)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 清理缓存（可选，节省空间）
+        if: always()
+        working-directory: immortalwrt
+        run: |
+          rm -rf staging_dir/build_dir || true
+          rm -rf tmp || true
