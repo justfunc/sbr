@@ -22,7 +22,7 @@ env:
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
   FEEDS_CONF: feeds.conf.default
-  REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase
+  REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase.git
   REPO_BRANCH: 25.12-dev
 
 jobs:
@@ -42,6 +42,11 @@ jobs:
       - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
         run: |
           sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
+          sudo apt-get -yqq install dos2unix python3-netifaces libfuse-dev
+          # 添加 pnpm 依赖
+          npm install -g pnpm
+          sudo apt-get -qq autoremove --purge
+          sudo apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir immortalwrt
           sudo chown $USER:$GROUPS immortalwrt
