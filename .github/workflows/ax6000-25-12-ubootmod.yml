@@ -62,6 +62,7 @@ jobs:
       #     cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
       #     grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
       #     [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
+      
       # - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
       #   working-directory: immortalwrt
       #   run: |
