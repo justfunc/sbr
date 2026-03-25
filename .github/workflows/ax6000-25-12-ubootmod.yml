@@ -18,7 +18,7 @@ on:
 
 env:
   DIY_P1_SH: scripts/custom_feeds.sh
-  DIY_P2_SH: scripts/custom_settings.sh
+  DIY_P2_SH: scripts/custom_settings_25_12.sh
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
   FEEDS_CONF: 25-12-feeds.conf
@@ -41,6 +41,8 @@ jobs:
 
       - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
         run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
           sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
           sudo apt-get -yqq install dos2unix python3-netifaces libfuse-dev
           # 添加 pnpm 依赖
