@@ -55,7 +55,7 @@ jobs:
 
       - name: 检出最新代码
         run: |
-          git clone --depth 1 --single-branch -b $REPO_BRANCH $REPO_URL immortalwrt
+          git clone --depth 1 --single-branch --filter=blob:none -b $REPO_BRANCH $REPO_URL immortalwrt
           [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
           [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
 
