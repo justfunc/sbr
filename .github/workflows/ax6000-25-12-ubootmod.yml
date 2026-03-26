@@ -15,9 +15,16 @@ on:
         required: false
         default: false
         type: boolean
+      diy-part1_sh:
+        description: "自定义添加源"
+        required: true
+        default: "diy-part1"
+        type: choice
+          - "diy-part1"
+          - "custom_feeds_25_12"
 
 env:
-  DIY_P1_SH: scripts/custom_feeds_25_12.sh
+  DIY_P1_SH: scripts/${{github.event.inputs.diy-part1_sh}}.sh
   DIY_P2_SH: scripts/custom_settings_25_12.sh
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
@@ -74,11 +81,6 @@ jobs:
       #     grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
       #     [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
 
-      # - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
-      #   working-directory: immortalwrt
-      #   run: |
-      #     bash $GITHUB_WORKSPACE/$DIY_P1_SH
-
       - name: 更新 feeds
         working-directory: immortalwrt
         run: |
@@ -88,6 +90,11 @@ jobs:
         working-directory: immortalwrt
         run: |
           ./scripts/feeds install -a
+
+      - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
+        working-directory: immortalwrt
+        run: |
+          bash $GITHUB_WORKSPACE/$DIY_P1_SH
 
       - name: Load custom configuration （加载自定义配置 custom_settings.sh）
         working-directory: immortalwrt
