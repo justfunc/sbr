@@ -29,8 +29,8 @@ rm -rf package/luci-app-advancedplus
 git clone --depth=1 https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus  #高级设置
 rm -rf package/luci-app-authshield 
 git clone --depth=1 https://github.com/iv7777/luci-app-authshield package/luci-app-authshield  #防止异常登录保护
-rm -rf package/luci-app-timewol
-git clone --depth=1 https://github.com/VIKINGYFY/packages package/luci-app-timewol
+# rm -rf package/luci-app-timewol
+# git clone --depth=1 https://github.com/VIKINGYFY/packages package/luci-app-timewol
 rm -rf package/luci-app-wolplus
 git clone --depth=1 https://github.com/VIKINGYFY/packages package/luci-app-wolplus
 rm -rf package/luci-app-owq-wol
