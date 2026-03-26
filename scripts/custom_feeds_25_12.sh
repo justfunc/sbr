@@ -19,13 +19,13 @@ rm -rf package/luci-theme-orion
 git clone --depth 1 --single-branch https://github.com/CoolLoong/luci-theme-orion package/luci-theme-orion
 
 # 常用工具与应用
-# rm -rf package/luci-app-poweroffdevice
-# git clone --depth=1 https://github.com/sirpdboy/luci-app-poweroffdevice package/luci-app-poweroffdevice   #关机
-# rm -rf package/luci-app-taskplan
-# git clone --depth=1 https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan    #计划任务
-# rm -rf package/luci-app-advancedplus
-# git clone --depth=1 https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus  #高级设置
-# rm -rf package/luci-app-authshield 
-# git clone --depth=1 https://github.com/iv7777/luci-app-authshield package/luci-app-authshield  #防止异常登录保护
-# rm -rf package/luci-app-owq-wol
-# git clone --depth=1 https://github.com/isalikai/luci-app-owq-wol package/luci-app-owq-wol  # wol加强版
+rm -rf package/luci-app-poweroffdevice
+git clone --depth=1 https://github.com/sirpdboy/luci-app-poweroffdevice package/luci-app-poweroffdevice   #关机
+rm -rf package/luci-app-taskplan
+git clone --depth=1 https://github.com/sirpdboy/luci-app-taskplan package/luci-app-taskplan    #计划任务
+rm -rf package/luci-app-advancedplus
+git clone --depth=1 https://github.com/sirpdboy/luci-app-advancedplus package/luci-app-advancedplus  #高级设置
+rm -rf package/luci-app-authshield 
+git clone --depth=1 https://github.com/iv7777/luci-app-authshield package/luci-app-authshield  #防止异常登录保护
+rm -rf package/luci-app-owq-wol
+git clone --depth=1 https://github.com/isalikai/luci-app-owq-wol package/luci-app-owq-wol  # wol加强版
