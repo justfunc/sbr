@@ -66,9 +66,9 @@ UPDATE_PACKAGE "orion" "CoolLoong/luci-theme-orion" "master"
 # 常用工具与应用
 # UPDATE_PACKAGE "ddns-go" "sirpdboy/luci-app-ddns-go" "main"  #luci-app-ddns-go
 UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox luci-app-speedtest ookla-speedtest"  #homebox speedtest测速
-UPDATE_PACKAGE "poweroffdevice" "sirpdboy/luci-app-poweroffdevice" "js"   #关机
-UPDATE_PACKAGE "taskplan" "sirpdboy/luci-app-taskplan" "master"    #计划任务
-UPDATE_PACKAGE "watchdog" "sirpdboy/luci-app-watchdog" "main"  #看门狗
+UPDATE_PACKAGE "poweroffdevice" "sirpdboy/luci-app-poweroffdevice" "master" "" "luci-app-poweroffdevice"   #关机
+UPDATE_PACKAGE "taskplan" "sirpdboy/luci-app-taskplan" "main" "" "luci-app-taskplan"   #计划任务
+UPDATE_PACKAGE "watchdog" "sirpdboy/luci-app-watchdog" "main" "" "watchdog luci-app-watchdog"  #看门狗
 # UPDATE_PACKAGE "netwizard" "sirpdboy/luci-app-netwizard" "main"  #网络设置向导
 UPDATE_PACKAGE "advancedplus" "sirpdboy/luci-app-advancedplus" "main"  #高级设置
 UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"  #分区助手
