@@ -19,8 +19,6 @@ rm -rf package/luci-theme-orion
 git clone --depth 1 --single-branch https://github.com/CoolLoong/luci-theme-orion package/luci-theme-orion
 
 # 常用工具与应用
-rm -rf package/netspeedtest
-git clone --depth=1 https://github.com/sirpdboy/netspeedtest package/netspeedtest  #homebox speedtest测速
 rm -rf package/luci-app-poweroffdevice
 git clone --depth=1 https://github.com/sirpdboy/luci-app-poweroffdevice package/luci-app-poweroffdevice   #关机
 rm -rf package/luci-app-taskplan
