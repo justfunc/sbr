@@ -6,10 +6,10 @@ on:
       config_file:
         description: "选择配置文件"
         required: true
-        default: "ax6000-immortalwrt-25-12"
+        default: ax6000-immortalwrt-25-12
         type: choice
         options:
-          - "ax6000-immortalwrt-25-12"
+          - ax6000-immortalwrt-25-12
       ssh_enabled:
         description: "是否开启 SSH"
         required: false
