@@ -145,6 +145,7 @@ jobs:
           echo "ubootmod 固件数量: ${ubootmod_count}"
           rm -rf bin/packages
           rm -rf bin/targets/mediatek/filogic/packages
+          cp .comfig build.config
 
       - name: 上传编译产物（stock + ubootmod）
         if: success()
@@ -153,6 +154,7 @@ jobs:
           name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
           path: |
             immortalwrt/bin
+            immortalwrt/build.config
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
