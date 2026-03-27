@@ -17,11 +17,12 @@ on:
         type: boolean
       diy-part1_sh:
         description: "自定义添加源"
-        required: true
-        default: "diy-part1"
+        required: false
         type: choice
-          - "diy-part1"
-          - "custom_feeds_25_12"
+        options:
+          - none
+          - diy-part1
+          - custom_feeds_25_12
 
 env:
   DIY_P1_SH: scripts/${{github.event.inputs.diy-part1_sh}}.sh
@@ -83,6 +84,7 @@ jobs:
 
       - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
         working-directory: immortalwrt
+        if: ${{ env.DIY_P1_SH != 'none' }}
         run: |
           chmod +x $GITHUB_WORKSPACE/$DIY_P1_SH
           $GITHUB_WORKSPACE/$DIY_P1_SH
