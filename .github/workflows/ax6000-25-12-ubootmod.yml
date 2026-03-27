@@ -145,7 +145,7 @@ jobs:
           echo "ubootmod 固件数量: ${ubootmod_count}"
           rm -rf bin/packages
           rm -rf bin/targets/mediatek/filogic/packages
-          cp .comfig build.config
+          cp .comfig bin/targets/mediatek/filogic/build.config
 
       - name: 上传编译产物（stock + ubootmod）
         if: success()
