@@ -24,6 +24,9 @@ BUILD_DATE=$(date -u -d "+8 hours" "+%Y-%m-%d %H:%M:%S")
 echo -e "\n Build: $BUILD_DATE by Justfunc" >> package/base-files/files/etc/banner
 echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
 
+#添加编译日期标识
+sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ Build By Justfunc At $BUILD_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+
 # ---------------------------------------------------------
 # libxcrypt 专项救治 (极致精简版)
 # ---------------------------------------------------------
