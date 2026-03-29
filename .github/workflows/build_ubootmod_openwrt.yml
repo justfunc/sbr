@@ -149,7 +149,7 @@ jobs:
         working-directory: immortalwrt
         run: |
           echo "=== 编译失败，检查最后 200 行日志 ==="
-          tail -200 build.log || true
+          tail -100 build.log || true
           echo "=== build.log 中的 error/fatal 关键信息 ==="
           grep -niE "error:|fatal:|collect2:|Killed signal|No rule to make target|undefined reference" build.log | tail -50 || true
           echo "=== 最终 .config 中的 AX6000 设备 ==="

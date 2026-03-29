@@ -6,4 +6,4 @@ src-git telephony https://github.com/openwrt/telephony.git;openwrt-24.10
 # src-git targets https://github.com/openwrt/targets.git;openwrt-24.10
 # src-git oldpackages http://git.openwrt.org/packages.git;openwrt-24.10
 # src-link custom /usr/src/openwrt/custom-feed;openwrt-24.10
-src-git noobwrt https://github.com/nooblk-98/noobwrt-custom-feeds.git;main
+# src-git noobwrt https://github.com/nooblk-98/noobwrt-custom-feeds.git;main
