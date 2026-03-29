@@ -15,10 +15,12 @@ rm -rf package/luci-theme-aurora
 git clone --depth=1 https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
 rm -rf package/luci-app-aurora-config
 git clone --depth=1 https://github.com/eamonxg/luci-app-aurora-config package/luci-app-aurora-config
-rm -rf package/luci-theme-kucat
-git clone --depth=1 https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
-rm -rf package/luci-app-kucat-config
-git clone --depth=1 https://github.com/sirpdboy/luci-app-kucat-config package/luci-app-kucat-config
+# rm -rf package/luci-theme-kucat
+# git clone --depth=1 https://github.com/sirpdboy/luci-theme-kucat package/luci-theme-kucat
+# rm -rf package/luci-app-kucat-config
+# git clone --depth=1 https://github.com/sirpdboy/luci-app-kucat-config package/luci-app-kucat-config
+rm -rf package/luci-theme-orion
+git clone --depth 1 --single-branch https://github.com/CoolLoong/luci-theme-orion package/luci-theme-orion
 
 
 # 常用工具与应用
