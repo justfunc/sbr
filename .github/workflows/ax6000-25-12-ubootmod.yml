@@ -98,6 +98,12 @@ jobs:
         run: |
           ./scripts/feeds install -a
 
+      - name: Custom Packages
+        working-directory: immortalwrt
+        run: |
+          cd ./package/
+          bash $GITHUB_WORKSPACE/scripts/packages_25_12.sh
+
       - name: Load custom configuration （加载自定义配置 custom_settings.sh）
         working-directory: immortalwrt
         run: |
