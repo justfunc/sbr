@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - ax6000-immortalwrt-25-12
+          - ax6000_immortalwrt_uboot_25_12
       ssh_enabled:
         description: "是否开启 SSH"
         required: false
