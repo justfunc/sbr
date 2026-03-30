@@ -65,8 +65,9 @@ jobs:
       - name: 应用 ubootmod 补丁
         run: |
           bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
-          [ -e files ] && rm -rf immortalwrt/files && cp -rf ./files immortalwrt/
-          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
+          # [ -e files ] && rm -rf immortalwrt/files && cp -rf ./files immortalwrt/
+          # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
+          rm -rf immortalwrt/files
           cp $GITHUB_WORKSPACE/$CONFIG_FILE immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts

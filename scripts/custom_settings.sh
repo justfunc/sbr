@@ -21,11 +21,13 @@ sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d%H%M%S)' \
 # 获取当前北京时间 (UTC+8)
 BUILD_DATE=$(date -u -d "+8 hours" "+%Y-%m-%d %H:%M:%S")
 # banner中加入构建时间
-sed -i "s|BUILD_DATE|$BUILD_DATE|g" files/etc/banner
-cp -rf files/etc/banner package/base-files/files/etc/
+echo "\n -----------------------------------------------------" >> package/base-files/files/etc/banner
+echo "Build By Justfunc At $BUILD_DATE" >> package/base-files/files/etc/banner
+echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
 
 #添加编译日期标识
 sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $BUILD_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ gwrt-$BUILD_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
 # ---------------------------------------------------------
 # libxcrypt 专项救治 (极致精简版)
