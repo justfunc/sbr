@@ -125,12 +125,9 @@ jobs:
         run: |
           echo "=== 编译产物列表 ==="
           find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
-          echo "=== 检查 stock 和 ubootmod 固件 ==="
-          ls -lh bin/targets/mediatek/filogic/*stock* 2>/dev/null || echo "stock 版本缺失"
+          echo "=== 检查固件 ==="
           ls -lh bin/targets/mediatek/filogic/*ubootmod* 2>/dev/null || echo "ubootmod 版本缺失"
-          stock_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*stock*" 2>/dev/null | wc -l | tr -d ' ')
           ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" 2>/dev/null | wc -l | tr -d ' ')
-          echo "stock 固件数量: ${stock_count}"
           echo "ubootmod 固件数量: ${ubootmod_count}"
           rm -rf bin/packages 2>/dev/null || true
           rm -rf bin/targets/mediatek/filogic/packages 2>/dev/null || true

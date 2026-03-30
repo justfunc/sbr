@@ -117,20 +117,8 @@ jobs:
             echo "首次下载失败，重试中..."
             make download -j1 || true
           }
-      
-      - name: 缓存 staging_dir/ 目录（工具链）
-        uses: actions/cache@v5
-        id: cache-staging
-        with:
-          path: |
-            immortalwrt/staging_dir/host
-            immortalwrt/staging_dir/target-*
-            immortalwrt/staging_dir/toolchain-*
-          key: ${{ runner.os }}-immortalwrt-25-12-staging-${{ hashFiles('immortalwrt/.config') }}
-          restore-keys: |
-            ${{ runner.os }}-immortalwrt-25-12-staging-
 
-      - name: 开始编译 stock + ubootmod 固件
+      - name: 编译固件
         working-directory: immortalwrt
         run: |
           set -o pipefail
@@ -141,25 +129,21 @@ jobs:
         run: |
           echo "=== 编译产物列表 ==="
           find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
-          echo "=== 检查 stock 和 ubootmod 固件 ==="
-          ls -lh bin/targets/mediatek/filogic/*stock* 2>/dev/null || echo "stock 版本缺失"
+          echo "=== 检查固件 ==="
           ls -lh bin/targets/mediatek/filogic/*ubootmod* 2>/dev/null || echo "ubootmod 版本缺失"
-          stock_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*stock*" | wc -l | tr -d ' ')
           ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" | wc -l | tr -d ' ')
-          echo "stock 固件数量: ${stock_count}"
           echo "ubootmod 固件数量: ${ubootmod_count}"
           rm -rf bin/packages
           rm -rf bin/targets/mediatek/filogic/packages
           cp .config bin/targets/mediatek/filogic/build.config
 
-      - name: 上传编译产物（stock + ubootmod）
+      - name: 上传编译产物
         if: success()
         uses: actions/upload-artifact@main
         with:
           name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}
           path: |
-            immortalwrt/bin
-            immortalwrt/build.config
+            bin/targets/mediatek/filogic
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
