@@ -138,7 +138,7 @@ jobs:
         working-directory: immortalwrt
         run: |
           scripts/diffconfig.sh > seed.config
-          cat seed.config
+          cat seed.config || true
           make defconfig
 
       - name: 下载源码（加速后续编译）
@@ -162,6 +162,7 @@ jobs:
           make -j$(nproc) V=s 2>&1 | tee build.log
 
       - name: 检查编译产物
+        if: always()
         working-directory: immortalwrt
         run: |
           echo "=== 编译产物列表 ==="
@@ -169,21 +170,22 @@ jobs:
           echo "=== 检查 stock 和 ubootmod 固件 ==="
           ls -lh bin/targets/mediatek/filogic/*stock* 2>/dev/null || echo "stock 版本缺失"
           ls -lh bin/targets/mediatek/filogic/*ubootmod* 2>/dev/null || echo "ubootmod 版本缺失"
-          stock_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*stock*" | wc -l | tr -d ' ')
-          ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" | wc -l | tr -d ' ')
+          stock_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*stock*" 2>/dev/null | wc -l | tr -d ' ')
+          ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" 2>/dev/null | wc -l | tr -d ' ')
           echo "stock 固件数量: ${stock_count}"
           echo "ubootmod 固件数量: ${ubootmod_count}"
-          rm -rf bin/packages
-          rm -rf bin/targets/mediatek/filogic/packages
-          cp .config bin/targets/mediatek/filogic/build.config
+          rm -rf bin/packages 2>/dev/null || true
+          rm -rf bin/targets/mediatek/filogic/packages 2>/dev/null || true
+          cp .config bin/targets/mediatek/filogic/build.config 2>/dev/null || true
 
       - name: 上传编译产物（stock + ubootmod）
-        if: success()
+        if: always()
         uses: actions/upload-artifact@main
+        continue-on-error: true
         with:
           name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
           path: |
-            immortalwrt/bin
+            immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
@@ -215,9 +217,13 @@ jobs:
           echo "- feeds/ 缓存: ${{ steps.cache-feeds.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
           echo "- staging_dir/ 缓存: ${{ steps.cache-staging.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
 
-      - name: 清理缓存（可选，节省空间）
+      - name: 清理临时文件（可选，节省空间）
         if: always()
+        continue-on-error: true
         working-directory: immortalwrt
         run: |
-          rm -rf staging_dir/build_dir || true
-          rm -rf tmp || true
+          # 只清理临时文件，不删除可能被缓存的内容
+          rm -rf tmp 2>/dev/null || true
+          rm -rf staging_dir/target-*/build 2>/dev/null || true
+          # 注意：不删除 staging_dir/build_dir，因为它可能被缓存使用
+          # 注意：不删除 staging_dir/host 和 staging_dir/toolchain-*，它们会被缓存
