@@ -73,7 +73,7 @@ jobs:
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
 
       - name: 缓存 dl/ 目录
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-dl
         with:
           path: immortalwrt/dl
@@ -82,7 +82,7 @@ jobs:
             ${{ runner.os }}-immortalwrt-dl-
 
       - name: 缓存 feeds/ 目录
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-feeds
         with:
           path: immortalwrt/feeds
@@ -91,7 +91,7 @@ jobs:
             ${{ runner.os }}-immortalwrt-feeds-
 
       - name: 缓存 staging_dir/ 目录（工具链）
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-staging
         with:
           path: |
