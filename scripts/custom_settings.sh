@@ -21,8 +21,7 @@ sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d%H%M%S)' \
 # 获取当前北京时间 (UTC+8)
 BUILD_DATE=$(date -u -d "+8 hours" "+%Y-%m-%d %H:%M:%S")
 # banner中加入构建时间
-echo -e "\n Build: $BUILD_DATE by Justfunc" >> package/base-files/files/etc/banner
-echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
+sed -i "s|BUILD_DATE|$CURRENT_DATE|g" files/etc/banner
 
 #添加编译日期标识
 sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $BUILD_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")

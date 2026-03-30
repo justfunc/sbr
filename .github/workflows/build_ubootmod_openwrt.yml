@@ -65,7 +65,7 @@ jobs:
       - name: 应用 ubootmod 补丁
         run: |
           bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
-          [ -e files ] && cp -af files/* immortalwrt/files/
+          [ -e files ] && rm -rf immortalwrt/files && cp -af ./files immortalwrt/
           [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
           cp $GITHUB_WORKSPACE/$CONFIG_FILE immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
