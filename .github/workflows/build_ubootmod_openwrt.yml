@@ -114,8 +114,6 @@ jobs:
       - name: 加载 Redmi AX6000 配置
         working-directory: immortalwrt
         run: |
-          scripts/diffconfig.sh > seed.config
-          cat seed.config || true
           make defconfig
 
       - name: 下载源码
