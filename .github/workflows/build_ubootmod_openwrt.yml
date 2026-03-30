@@ -45,14 +45,14 @@ jobs:
         run: |
           sudo -E apt -yqq purge firefox
           sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
-          sudo apt-get -E -yqq install dos2unix python3-netifaces libfuse-dev
+          sudo apt -yqq install dos2unix python3-netifaces libfuse-dev
           # 添加 pnpm 依赖
           npm install -g pnpm
-          sudo -E apt-get -yqq autoremove --purge
-          sudo -E apt-get -yqq autoclean
-          sudo -E apt-get -yqq clean
-          sudo -E systemctl daemon-reload
-          sudo -E timedatectl set-timezone "$TZ"
+          sudo apt -yqq autoremove --purge
+          sudo apt -yqq autoclean
+          sudo apt -yqq clean
+          sudo systemctl daemon-reload
+          sudo timedatectl set-timezone "$TZ"
           sudo mkdir immortalwrt
           sudo chown $USER:$GROUPS immortalwrt
           echo "初始磁盘空间:"
@@ -134,14 +134,14 @@ jobs:
         with:
           limit-access-to-actor: true
 
-      - name: 加载 Redmi AX6000 原仓库配置
+      - name: 加载 Redmi AX6000 配置
         working-directory: immortalwrt
         run: |
           scripts/diffconfig.sh > seed.config
           cat seed.config || true
           make defconfig
 
-      - name: 下载源码（加速后续编译）
+      - name: 下载源码
         working-directory: immortalwrt
         run: |
           # 如果 dl/ 缓存命中，跳过下载
@@ -178,7 +178,7 @@ jobs:
           rm -rf bin/targets/mediatek/filogic/packages 2>/dev/null || true
           cp .config bin/targets/mediatek/filogic/build.config 2>/dev/null || true
 
-      - name: 上传编译产物（stock + ubootmod）
+      - name: 上传编译产物
         if: always()
         uses: actions/upload-artifact@main
         continue-on-error: true
@@ -216,14 +216,3 @@ jobs:
           echo "- dl/ 缓存: ${{ steps.cache-dl.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
           echo "- feeds/ 缓存: ${{ steps.cache-feeds.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
           echo "- staging_dir/ 缓存: ${{ steps.cache-staging.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
-
-      - name: 清理临时文件（可选，节省空间）
-        if: always()
-        continue-on-error: true
-        working-directory: immortalwrt
-        run: |
-          # 只清理临时文件，不删除可能被缓存的内容
-          rm -rf tmp 2>/dev/null || true
-          rm -rf staging_dir/target-*/build 2>/dev/null || true
-          # 注意：不删除 staging_dir/build_dir，因为它可能被缓存使用
-          # 注意：不删除 staging_dir/host 和 staging_dir/toolchain-*，它们会被缓存
