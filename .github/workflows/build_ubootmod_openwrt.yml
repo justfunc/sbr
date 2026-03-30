@@ -71,7 +71,37 @@ jobs:
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
-      
+
+      - name: 缓存 dl/ 目录
+        uses: actions/cache@v4
+        id: cache-dl
+        with:
+          path: immortalwrt/dl
+          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/feeds.conf.default', 'immortalwrt/.config') }}
+          restore-keys: |
+            ${{ runner.os }}-immortalwrt-dl-
+
+      - name: 缓存 feeds/ 目录
+        uses: actions/cache@v4
+        id: cache-feeds
+        with:
+          path: immortalwrt/feeds
+          key: ${{ runner.os }}-immortalwrt-feeds-${{ hashFiles('immortalwrt/feeds.conf.default') }}
+          restore-keys: |
+            ${{ runner.os }}-immortalwrt-feeds-
+
+      - name: 缓存 staging_dir/ 目录（工具链）
+        uses: actions/cache@v4
+        id: cache-staging
+        with:
+          path: |
+            immortalwrt/staging_dir/host
+            immortalwrt/staging_dir/target-*
+            immortalwrt/staging_dir/toolchain-*
+          key: ${{ runner.os }}-immortalwrt-staging-${{ hashFiles('immortalwrt/.config') }}
+          restore-keys: |
+            ${{ runner.os }}-immortalwrt-staging-
+
       - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
         working-directory: immortalwrt
         run: |
@@ -80,8 +110,14 @@ jobs:
       - name: 更新 feeds
         working-directory: immortalwrt
         run: |
-          ./scripts/feeds update -a
-  
+          # 如果缓存未命中或 feeds.conf.default 变化，才更新 feeds
+          if [ "${{ steps.cache-feeds.outputs.cache-hit }}" != "true" ]; then
+            echo "缓存未命中，更新 feeds..."
+            ./scripts/feeds update -a
+          else
+            echo "缓存命中，跳过 feeds 更新"
+          fi
+
       - name: 安装 feeds
         working-directory: immortalwrt
         run: |
@@ -108,10 +144,16 @@ jobs:
       - name: 下载源码（加速后续编译）
         working-directory: immortalwrt
         run: |
-          make download -j$(nproc) || {
-            echo "首次下载失败，重试中..."
-            make download -j1 || true
-          }
+          # 如果 dl/ 缓存命中，跳过下载
+          if [ "${{ steps.cache-dl.outputs.cache-hit }}" != "true" ]; then
+            echo "dl/ 缓存未命中，开始下载源码..."
+            make download -j$(nproc) || {
+              echo "首次下载失败，重试中..."
+              make download -j1 || true
+            }
+          else
+            echo "dl/ 缓存命中，跳过源码下载"
+          fi
 
       - name: 开始编译 stock + ubootmod 固件
         working-directory: immortalwrt
@@ -168,6 +210,10 @@ jobs:
           if [ -f immortalwrt/build.log ]; then
             echo "- 编译日志行数: $(wc -l < immortalwrt/build.log)" >> $GITHUB_STEP_SUMMARY
           fi
+          echo "## 缓存状态" >> $GITHUB_STEP_SUMMARY
+          echo "- dl/ 缓存: ${{ steps.cache-dl.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
+          echo "- feeds/ 缓存: ${{ steps.cache-feeds.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
+          echo "- staging_dir/ 缓存: ${{ steps.cache-staging.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
 
       - name: 清理缓存（可选，节省空间）
         if: always()
