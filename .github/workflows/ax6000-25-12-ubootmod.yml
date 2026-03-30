@@ -130,7 +130,6 @@ jobs:
           }
 
       - name: 开始编译 stock + ubootmod 固件
-        timeout-minutes: 100
         working-directory: immortalwrt
         run: |
           set -o pipefail
