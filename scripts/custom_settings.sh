@@ -25,7 +25,7 @@ echo -e "\n Build: $BUILD_DATE by Justfunc" >> package/base-files/files/etc/bann
 echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
 
 #添加编译日期标识
-sed -i "s/boardinfo.kernel/boardinfo.kernel + ' (Build By Justfunc At $BUILD_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $BUILD_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
 # ---------------------------------------------------------
 # libxcrypt 专项救治 (极致精简版)
