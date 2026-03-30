@@ -72,18 +72,6 @@ jobs:
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
 
-      - name: 缓存 staging_dir/ 目录（工具链）
-        uses: actions/cache@v5
-        id: cache-staging
-        with:
-          path: |
-            immortalwrt/staging_dir/host
-            immortalwrt/staging_dir/target-*
-            immortalwrt/staging_dir/toolchain-*
-          key: ${{ runner.os }}-immortalwrt-staging-${{ hashFiles('immortalwrt/.config') }}
-          restore-keys: |
-            ${{ runner.os }}-immortalwrt-staging-
-
       - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
         working-directory: immortalwrt
         run: |
@@ -181,5 +169,3 @@ jobs:
           if [ -f immortalwrt/build.log ]; then
             echo "- 编译日志行数: $(wc -l < immortalwrt/build.log)" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "## 缓存状态" >> $GITHUB_STEP_SUMMARY
-          echo "- staging_dir/ 缓存: ${{ steps.cache-staging.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
