@@ -72,16 +72,6 @@ jobs:
           [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
           [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
 
-      # - name: 应用 ubootmod 分区补丁
-      #   run: |
-      #     bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
-      #     [ -e files ] && mv files immortalwrt/files
-      #     [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
-      #     echo "=== 当前 AX6000 DTS ==="
-      #     cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
-      #     grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
-      #     [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
-
       - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
         working-directory: immortalwrt
         if: ${{ inputs.diy-part1_sh != 'none' }}
@@ -127,6 +117,18 @@ jobs:
             echo "首次下载失败，重试中..."
             make download -j1 || true
           }
+      
+      - name: 缓存 staging_dir/ 目录（工具链）
+        uses: actions/cache@v5
+        id: cache-staging
+        with:
+          path: |
+            immortalwrt/staging_dir/host
+            immortalwrt/staging_dir/target-*
+            immortalwrt/staging_dir/toolchain-*
+          key: ${{ runner.os }}-immortalwrt-25-12-staging-${{ hashFiles('immortalwrt/.config') }}
+          restore-keys: |
+            ${{ runner.os }}-immortalwrt-25-12-staging-
 
       - name: 开始编译 stock + ubootmod 固件
         working-directory: immortalwrt
@@ -184,10 +186,3 @@ jobs:
           if [ -f immortalwrt/build.log ]; then
             echo "- 编译日志行数: $(wc -l < immortalwrt/build.log)" >> $GITHUB_STEP_SUMMARY
           fi
-
-      - name: 清理缓存（可选，节省空间）
-        if: always()
-        working-directory: immortalwrt
-        run: |
-          rm -rf staging_dir/build_dir || true
-          rm -rf tmp || true
