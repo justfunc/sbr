@@ -155,7 +155,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@main
         with:
-          name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
+          name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}
           path: |
             immortalwrt/bin
             immortalwrt/build.config

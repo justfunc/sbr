@@ -154,7 +154,7 @@ jobs:
         uses: actions/upload-artifact@main
         continue-on-error: true
         with:
-          name: ImmortalWrt-Redmi-AX6000-${{ github.run_number }}
+          name: ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15

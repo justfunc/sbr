@@ -16,7 +16,7 @@ sed -i 's/ImmortalWrt/gwrt/g' package/base-files/files/bin/config_generate
 
 # add date in output file name
 sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d%H%M%S)' \
-       -e '/^IMG_PREFIX:=/ s/\($(SUBTARGET)\)/\1-$(BUILD_DATE)/' include/image.mk
+       -e '/^IMG_PREFIX:=/ s/\($(SUBTARGET)\)/\1-24-10-$(BUILD_DATE)/' include/image.mk
 
 # 获取当前北京时间 (UTC+8)
 BUILD_DATE=$(date -u -d "+8 hours" "+%Y-%m-%d %H:%M:%S")
