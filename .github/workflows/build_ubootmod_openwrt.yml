@@ -72,24 +72,6 @@ jobs:
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
 
-      - name: 缓存 dl/ 目录
-        uses: actions/cache@v5
-        id: cache-dl
-        with:
-          path: immortalwrt/dl
-          key: ${{ runner.os }}-immortalwrt-dl-${{ hashFiles('immortalwrt/feeds.conf.default', 'immortalwrt/.config') }}
-          restore-keys: |
-            ${{ runner.os }}-immortalwrt-dl-
-
-      - name: 缓存 feeds/ 目录
-        uses: actions/cache@v5
-        id: cache-feeds
-        with:
-          path: immortalwrt/feeds
-          key: ${{ runner.os }}-immortalwrt-feeds-${{ hashFiles('immortalwrt/feeds.conf.default') }}
-          restore-keys: |
-            ${{ runner.os }}-immortalwrt-feeds-
-
       - name: 缓存 staging_dir/ 目录（工具链）
         uses: actions/cache@v5
         id: cache-staging
@@ -110,13 +92,8 @@ jobs:
       - name: 更新 feeds
         working-directory: immortalwrt
         run: |
-          # 如果缓存未命中或 feeds.conf.default 变化，才更新 feeds
-          if [ "${{ steps.cache-feeds.outputs.cache-hit }}" != "true" ]; then
-            echo "缓存未命中，更新 feeds..."
-            ./scripts/feeds update -a
-          else
-            echo "缓存命中，跳过 feeds 更新"
-          fi
+          ./scripts/feeds update -a
+
 
       - name: 安装 feeds
         working-directory: immortalwrt
@@ -144,25 +121,19 @@ jobs:
       - name: 下载源码
         working-directory: immortalwrt
         run: |
-          # 如果 dl/ 缓存命中，跳过下载
-          if [ "${{ steps.cache-dl.outputs.cache-hit }}" != "true" ]; then
-            echo "dl/ 缓存未命中，开始下载源码..."
-            make download -j$(nproc) || {
-              echo "首次下载失败，重试中..."
-              make download -j1 || true
-            }
-          else
-            echo "dl/ 缓存命中，跳过源码下载"
-          fi
+          make download -j$(nproc) || {
+            echo "首次下载失败，重试中..."
+            make download -j1 || true
+          }
 
-      - name: 开始编译 stock + ubootmod 固件
+      - name: 编译固件
         working-directory: immortalwrt
         run: |
           set -o pipefail
           make -j$(nproc) V=s 2>&1 | tee build.log
 
       - name: 检查编译产物
-        if: always()
+        if: success()
         working-directory: immortalwrt
         run: |
           echo "=== 编译产物列表 ==="
@@ -179,7 +150,7 @@ jobs:
           cp .config bin/targets/mediatek/filogic/build.config 2>/dev/null || true
 
       - name: 上传编译产物
-        if: always()
+        if: success()
         uses: actions/upload-artifact@main
         continue-on-error: true
         with:
@@ -204,7 +175,7 @@ jobs:
           ls -lh bin/targets/mediatek/filogic/ || true
 
       - name: 生成构建摘要
-        if: always()
+        if: success()
         run: |
           echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
@@ -213,6 +184,4 @@ jobs:
             echo "- 编译日志行数: $(wc -l < immortalwrt/build.log)" >> $GITHUB_STEP_SUMMARY
           fi
           echo "## 缓存状态" >> $GITHUB_STEP_SUMMARY
-          echo "- dl/ 缓存: ${{ steps.cache-dl.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
-          echo "- feeds/ 缓存: ${{ steps.cache-feeds.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
           echo "- staging_dir/ 缓存: ${{ steps.cache-staging.outputs.cache-hit }}" >> $GITHUB_STEP_SUMMARY
