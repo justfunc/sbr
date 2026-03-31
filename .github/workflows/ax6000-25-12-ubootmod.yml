@@ -81,12 +81,6 @@ jobs:
         working-directory: immortalwrt
         run: |
           ./scripts/feeds install -a
-          
-      - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
-        working-directory: immortalwrt
-        if: ${{ inputs.diy-part1_sh != 'none' }}
-        run: |
-          bash $GITHUB_WORKSPACE/defconfig/${{ inputs.diy-part1_sh }}.sh    
 
       - name: Custom Packages
         working-directory: immortalwrt
