@@ -29,3 +29,7 @@ rm -rf package/luci-app-authshield
 git clone --depth=1 https://github.com/iv7777/luci-app-authshield package/luci-app-authshield  #防止异常登录保护
 rm -rf package/luci-app-owq-wol
 git clone --depth=1 https://github.com/isalikai/luci-app-owq-wol package/luci-app-owq-wol  # wol加强版
+rm -rf package/luci-app-partexp
+git clone --depth 1 --single-branch https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
+rm -rf package/luci-app-quickfile
+git clone --depth 1 --single-branch https://github.com/sbwml/luci-app-quickfile package/luci-app-quickfile

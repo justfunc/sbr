@@ -40,3 +40,7 @@ rm -rf package/luci-app-wolplus
 git clone --depth=1 https://github.com/VIKINGYFY/packages package/luci-app-wolplus
 rm -rf package/luci-app-owq-wol
 git clone --depth=1 https://github.com/isalikai/luci-app-owq-wol package/luci-app-owq-wol  # wol加强版
+rm -rf package/luci-app-partexp
+git clone --depth 1 --single-branch https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
+rm -rf package/luci-app-quickfile
+git clone --depth 1 --single-branch https://github.com/sbwml/luci-app-quickfile package/luci-app-quickfile
