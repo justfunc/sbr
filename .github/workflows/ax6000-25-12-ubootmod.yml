@@ -6,9 +6,10 @@ on:
       config_file:
         description: "选择配置文件"
         required: true
-        default: ax6000-immortalwrt-25-12
+        default: mt7986-ax6000-immortalwrt-25-12
         type: choice
         options:
+          - mt7986-ax6000-immortalwrt-25-12
           - ax6000-immortalwrt-25-12
           - ax6000_immortalwrt_uboot_25_12
       ssh_enabled:
@@ -22,7 +23,6 @@ on:
         type: choice
         options:
           - none
-          - diy-part1
           - custom_feeds_25_12
 
 env:
@@ -84,9 +84,9 @@ jobs:
 
       - name: Custom Packages
         working-directory: immortalwrt
+        if: ${{ github.event.inputs.diy-part1_sh != 'none' }}
         run: |
-          cd ./package/
-          bash $GITHUB_WORKSPACE/scripts/packages_25_12.sh
+          bash $GITHUB_WORKSPACE/scripts/${{ github.event.inputs.diy-part1_sh }}.sh
 
       - name: Load custom configuration （加载自定义配置 custom_settings.sh）
         working-directory: immortalwrt
