@@ -21,8 +21,7 @@ sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d%H%M%S)' \
 # 获取当前北京时间 (UTC+8)
 BUILD_DATE=$(date -u -d "+8 hours" "+%Y-%m-%d %H:%M:%S")
 # banner中加入构建时间
-echo "" >> package/base-files/files/etc/banner
-echo "  Build By Justfunc At $BUILD_DATE" >> package/base-files/files/etc/banner
+echo -e "\n  Build By Justfunc At $BUILD_DATE" >> package/base-files/files/etc/banner
 echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
 
 #添加编译日期标识
