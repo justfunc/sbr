@@ -143,7 +143,7 @@ jobs:
         with:
           name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}
           path: |
-            bin/targets/mediatek/filogic
+            immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
