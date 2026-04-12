@@ -68,7 +68,7 @@ jobs:
           git clone  -b ${REPO_BRANCH} --depth 1 --single-branch --filter=blob:none ${REPO_URL} immortalwrt
 
       - name: 应用 ubootmod 补丁
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ubootmod_patch }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ubootmod_patch }}
         run: |
           bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
           echo "=== 当前 AX6000 DTS ==="
