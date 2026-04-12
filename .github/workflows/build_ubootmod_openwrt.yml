@@ -17,6 +17,11 @@ on:
         required: false
         default: false
         type: boolean
+      ubootmod_patch:
+        description: "是否应用 ubootmod 补丁"
+        required: false
+        default: false
+        type: boolean
 
 env:
   DIY_P1_SH: scripts/custom_feeds.sh
@@ -63,15 +68,18 @@ jobs:
           git clone  -b ${REPO_BRANCH} --depth 1 --single-branch --filter=blob:none ${REPO_URL} immortalwrt
 
       - name: 应用 ubootmod 补丁
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ubootmod_patch }}
         run: |
           bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
-          # [ -e files ] && rm -rf immortalwrt/files && cp -rf ./files immortalwrt/
-          # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
-          rm -rf immortalwrt/files
-          cp $GITHUB_WORKSPACE/$CONFIG_FILE immortalwrt/.config
           echo "=== 当前 AX6000 DTS ==="
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
+      
+      - name: 加载配置文件
+        run: |
+          # [ -e files ] && rm -rf immortalwrt/files && cp -rf ./files immortalwrt/
+          # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
+          cp $GITHUB_WORKSPACE/$CONFIG_FILE immortalwrt/.config
 
       - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
         working-directory: immortalwrt
@@ -92,6 +100,7 @@ jobs:
       - name: Load custom configuration （加载自定义配置 custom_settings.sh）
         working-directory: immortalwrt
         run: |
+          rm -rf files
           bash $GITHUB_WORKSPACE/$DIY_P2_SH
       
       - name: SSH 连接（可选）
