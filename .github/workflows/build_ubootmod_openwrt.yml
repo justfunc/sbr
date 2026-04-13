@@ -128,7 +128,7 @@ jobs:
           set -o pipefail
           make -j$(nproc) V=s 2>&1 | tee build.log
 
-      - name: 检查编译产物
+      - name: 检查&整理编译产物
         if: success()
         working-directory: immortalwrt
         run: |
@@ -141,6 +141,7 @@ jobs:
           rm -rf bin/packages 2>/dev/null || true
           rm -rf bin/targets/mediatek/filogic/packages 2>/dev/null || true
           cp .config bin/targets/mediatek/filogic/build.config 2>/dev/null || true
+          tar -czf ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}.tar.gz bin/targets/mediatek/filogic/* || true
 
       - name: 上传编译产物
         if: success()
@@ -149,7 +150,7 @@ jobs:
         with:
           name: ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}
           path: |
-            immortalwrt/bin/targets/mediatek/filogic
+            immortalwrt/ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}.tar.gz
           retention-days: 15
           if-no-files-found: warn
           compression-level: 6
