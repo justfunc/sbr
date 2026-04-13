@@ -141,7 +141,6 @@ jobs:
           rm -rf bin/packages 2>/dev/null || true
           rm -rf bin/targets/mediatek/filogic/packages 2>/dev/null || true
           cp .config bin/targets/mediatek/filogic/build.config 2>/dev/null || true
-          GZIP=-9 tar -czf ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}.tar.gz bin/targets/mediatek/filogic
 
       - name: 上传编译产物
         if: success()
@@ -150,10 +149,10 @@ jobs:
         with:
           name: ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}
           path: |
-            immortalwrt/ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}.tar.gz
+            immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15
           if-no-files-found: warn
-          compression-level: 6
+          compression-level: 9
 
       - name: 检查编译日志
         if: failure()
