@@ -20,7 +20,7 @@ jobs:
           sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
 
       - name: 缓存 dl/
-        uses: actions/cache@v5.0.3
+        uses: actions/cache@v5.0.5
         id: cache-dl
         with:
           path: immortalwrt/dl
@@ -33,7 +33,7 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
       - name: 缓存 staging_dir/
-        uses: actions/cache@v5.0.3
+        uses: actions/cache@v5.0.5
         id: cache-staging
         with:
           path: immortalwrt/staging_dir
