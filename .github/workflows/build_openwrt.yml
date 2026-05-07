@@ -69,7 +69,7 @@ jobs:
           MAKEFLAGS: "-j$(nproc)"
 
       - name: 上传编译产物（U-Boot 版本固件）
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7
         with:
           name: ImmortalWrt-Redmi-AX6000-UbootMod-${{ github.run_number }}
           path: |
