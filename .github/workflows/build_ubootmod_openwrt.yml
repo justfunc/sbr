@@ -29,7 +29,7 @@ env:
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
   FEEDS_CONF: feeds.conf.default
-  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6.git
+  REPO_URL: https://github.com/Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly.git
   REPO_BRANCH: openwrt-24.10-6.6
 
 jobs:
