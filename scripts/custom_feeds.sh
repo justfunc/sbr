@@ -44,5 +44,5 @@ git clone --depth 1 --single-branch https://github.com/sbwml/luci-theme-argon pa
 # git clone --depth 1 --single-branch https://github.com/sirpdboy/luci-app-partexp package/luci-app-partexp
 # rm -rf package/luci-app-quickfile
 # git clone --depth 1 --single-branch https://github.com/sbwml/luci-app-quickfile package/luci-app-quickfile
-rm -rf package/dae
-git clone --depth 1 --single-branch https://github.com/QiuSimons/luci-app-daed package/dae
+# rm -rf package/dae
+# git clone --depth 1 --single-branch https://github.com/QiuSimons/luci-app-daed package/dae
