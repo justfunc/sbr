@@ -23,6 +23,7 @@ BUILD_DATE=$(date -u -d "+8 hours" "+%Y-%m-%d %H:%M:%S")
 # banner中加入构建时间
 echo -e "\n Build By Justfunc At $BUILD_DATE" >> package/base-files/files/etc/banner
 echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
+echo "export LANG=en_US.UTF-8" >> package/base-files/files/etc/profile
 
 #添加编译日期标识
 sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $BUILD_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
