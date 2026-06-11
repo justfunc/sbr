@@ -9,8 +9,8 @@
 # sed -i '2i src-git small https://github.com/kenzok8/small' feeds.conf.default
 
 # UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
-rm -rf package/luci-theme-argon
-git clone --depth 1 --single-branch https://github.com/sbwml/luci-theme-argon package/luci-theme-argon
+# rm -rf package/luci-theme-argon
+# git clone --depth 1 --single-branch https://github.com/sbwml/luci-theme-argon package/luci-theme-argon
 # rm -rf package/luci-theme-aurora
 # git clone --depth 1 --single-branch https://github.com/eamonxg/luci-theme-aurora package/luci-theme-aurora
 # rm -rf package/luci-app-aurora-config
