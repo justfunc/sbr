@@ -6,9 +6,10 @@ on:
       config_file:
         description: "选择配置文件"
         required: true
-        default: mt7986-ax6000-immortalwrt-25-12
+        default: redmi-ax6000-25_12
         type: choice
         options:
+          - redmi-ax6000-25_12
           - mt7986-ax6000-immortalwrt-25-12
           - ax6000-immortalwrt-25-12
           - ax6000_immortalwrt_uboot_25_12
