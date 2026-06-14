@@ -1,5 +1,5 @@
 name: Immortalwrt-25.12_redmi-ax6000-ubootmod Build
-run-name: "ImmortalWrt-25-12-6-12-Redmi-AX6000-Build ${{ github.actor }} | ${{ github.sha }} - ${{ github.event.head_commit.message}} "
+run-name: "ImmortalWrt-25-12-6-12-Redmi-AX6000-Build ${{ github.actor }} | ${{ github.sha }} - ${{ github.event.head_commit.message || github.event.pull_request.head.repo.commits[0].message }} "
 
 on:
   workflow_dispatch:
@@ -44,7 +44,7 @@ jobs:
           echo "输入参数："
           echo "  配置文件: ${CONFIG_FILE}"
           echo "  开启 SSH: ${{inputs.ssh_enabled}}"
-          echo "  当前提交： ${{ github.sha }} - ${{ github.event.head_commit.message }}"
+          echo "  当前提交： ${{ github.sha }} - ${{ github.event.head_commit.message || github.event.pull_request.head.repo.commits[0].message }}"
 
       - name: Check out
         uses: actions/checkout@main
