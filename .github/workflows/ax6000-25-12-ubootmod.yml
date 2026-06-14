@@ -62,7 +62,7 @@ jobs:
           TARGET_TITLE="[${SHORT_SHA}] - ${COMMIT_MSG}"
           echo "T_TITLE=$TARGET_TITLE" >> $GITHUB_OUTPUT
 
-      - name: Current version: ${{ steps.commitversionmsg.outputs.T_TITLE }}
+      - name: "Current version: ${{ steps.commitversionmsg.outputs.T_TITLE }}"
         run: |
           echo "当前版本：${{ steps.commitversionmsg.outputs.T_TITLE }}"
 
