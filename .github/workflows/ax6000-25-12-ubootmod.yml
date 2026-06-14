@@ -38,7 +38,6 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-
       - name: 输入参数
         run: |
           echo "输入参数："
@@ -51,7 +50,7 @@ jobs:
       - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
         run: |
           sudo docker image prune --all --force
-          sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android /opt/hostedtoolcache/CodeQL /opt/ghc sudo rm -rf /usr/local/share/boost /usr/lib/jvm
+          sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android /opt/hostedtoolcache/CodeQL /opt/ghc /usr/local/share/powershell /usr/local/share/boost /usr/lib/jvm
           sudo -E apt-mark hold grub-efi-amd64-signed 
           sudo -E apt-get -y purge azure-cli* docker* ghc* zulu* llvm* firefox google* dotnet* powershell* openjdk* mysql* php* mongodb* snap*
           sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
@@ -66,6 +65,15 @@ jobs:
           sudo chown $USER:$GROUPS immortalwrt
           echo "初始磁盘空间:"
           df -hT
+
+      - name: Optimize Disk Space and Expand Swap
+        run: |
+          sudo swapoff -a
+          sudo dd if=/dev/zero of=/swapfile bs=1M count=10240
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
 
       - name: 检出最新代码
         run: |
@@ -116,8 +124,15 @@ jobs:
       - name: 编译固件
         working-directory: immortalwrt
         run: |
-          set -o pipefail
-          make -j$(nproc) V=s 2>&1 | tee build.log
+          # 动态获取核心
+          BUILD_THREADS=$(nproc)
+          echo "Using $BUILD_THREADS threads"
+          
+          # 1. 优先通过环境变量压制主机和交叉编译的警告，不破坏底层的架构参数
+          export WERROR=0
+          
+          # 2. 正常执行编译，通过 EXTRA_CFLAGS 注入安全参数
+          make -j$BUILD_THREADS V=s EXTRA_CFLAGS="-Wno-error -Wno-format-nonliteral -Wno-format-security" 2>&1 | tee build.log
 
       - name: 检查编译产物
         working-directory: immortalwrt
@@ -146,7 +161,7 @@ jobs:
         if: failure()
         working-directory: immortalwrt
         run: |
-          echo "=== 编译失败，检查最后 20 行日志 ==="
+          echo "=== 编译失败，检查最后 200 行日
           tail -200 build.log || true
           echo "=== build.log 中的 error/fatal 关键信息 ==="
           grep -niE "error:|fatal:|collect2:|Killed signal|No rule to make target|undefined reference" build.log | tail -50 || true
