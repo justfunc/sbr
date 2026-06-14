@@ -132,10 +132,6 @@ jobs:
           echo "========================================="
           echo "🚀 正在启动 25.12 架构多线程并行编译..."
           echo "========================================="
-
-          # 【精准修复】单独对 mt_wifi 驱动执行一次编译，并允许它“假摔”
-          # 这样它生成的 .apk 驱动包会被安全保存，而最后的清理报错会被无视
-          make package/mtk/drivers/mt_wifi/compile -j$BUILD_THREADS V=s EXTRA_CFLAGS="-Wno-error -Wno-format-nonliteral -Wno-format-security" || true
           
           # 1. 多线程编译：通过 || true 阻断提前熔断
           make -j$BUILD_THREADS V=s EXTRA_CFLAGS="-Wno-error -Wno-format-nonliteral -Wno-format-security" 2>&1 | tee build.log || true
