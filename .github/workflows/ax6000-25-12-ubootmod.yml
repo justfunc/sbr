@@ -1,5 +1,5 @@
 name: Immortalwrt-25.12_redmi-ax6000-ubootmod Build
-run-name: "ImmortalWrt-25-12-6-12-Redmi-AX6000-Build ${{ github.actor }} | ${{ github.sha }} - ${{ github.event.head_commit.message || github.event.pull_request.head.repo.commits[0].message }} "
+run-name: "ImmortalWrt-25-12-6-12-Redmi-AX6000-Build ${{ github.actor }} | ${{ github.sha : 0 : 7 }}"
 
 on:
   workflow_dispatch:
@@ -44,12 +44,31 @@ jobs:
           echo "输入参数："
           echo "  配置文件: ${CONFIG_FILE}"
           echo "  开启 SSH: ${{inputs.ssh_enabled}}"
-          echo "  当前提交： ${{ github.sha }} - ${{ github.event.head_commit.message || github.event.pull_request.head.repo.commits[0].message }}"
+          echo "  当前提交： ${{ github.sha : 0 : 7 }}"
 
       - name: Check out
         uses: actions/checkout@main
         with:
           fetch-depth: 1
+          single-branch: true
+      
+      # 2. 动态提取并修改当前运行的名称
+      - name: Dynamically Update Run Title
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # 提取精简后的 7 位 Commit ID
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          
+          # 提取 Commit 的第一行消息（避免多行导致脚本报错）
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          
+          # 拼接成你想要的炫酷标题
+          TARGET_TITLE="[${SHORT_SHA}] - ${COMMIT_MSG}"
+          echo "即将将工作流名称修改为: $TARGET_TITLE"
+          
+          # 调用 GitHub 官方 API 实时修改界面上的运行名称
+          gh api -X PATCH /repos/${{ github.repository }}/actions/runs/${{ github.run_id }} -f title="$TARGET_TITLE"
 
       - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
         run: |
