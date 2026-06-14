@@ -55,17 +55,19 @@ jobs:
           fetch-depth: 1
           single-branch: true
       
-      # 2. 动态提取并修改当前运行的名称
+      # 动态提取并修改当前运行的名称
       - name: Dynamically Update Run Title
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           SHORT_SHA=$(git rev-parse --short HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%s)
           TARGET_TITLE="[${SHORT_SHA}] - ${COMMIT_MSG}"
           
-          gh api -X PATCH /repos/${{ github.repository }}/actions/runs/${{ github.run_id }} \
-            -f title="$TARGET_TITLE"
+          # 使用标准的 Linux 环境变量，更不容易出错
+          gh api -X PATCH "/repos/$REPO/actions/runs/$RUN_ID" -f title="$TARGET_TITLE"
 
       - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
         run: |
