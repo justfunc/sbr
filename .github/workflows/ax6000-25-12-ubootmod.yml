@@ -124,15 +124,36 @@ jobs:
       - name: 编译固件
         working-directory: immortalwrt
         run: |
-          # 动态获取核心
           BUILD_THREADS=$(nproc)
           echo "Using $BUILD_THREADS threads"
           
-          # 1. 优先通过环境变量压制主机和交叉编译的警告，不破坏底层的架构参数
           export WERROR=0
+
+          echo "========================================="
+          echo "🚀 正在启动 25.12 架构多线程并行编译..."
+          echo "========================================="
+
+          # 【精准修复】单独对 mt_wifi 驱动执行一次编译，并允许它“假摔”
+          # 这样它生成的 .apk 驱动包会被安全保存，而最后的清理报错会被无视
+          make package/mtk/drivers/mt_wifi/compile -j$BUILD_THREADS V=s EXTRA_CFLAGS="-Wno-error -Wno-format-nonliteral -Wno-format-security" || true
           
-          # 2. 正常执行编译，通过 EXTRA_CFLAGS 注入安全参数
-          make -j$BUILD_THREADS V=s EXTRA_CFLAGS="-Wno-error -Wno-format-nonliteral -Wno-format-security" 2>&1 | tee build.log
+          # 1. 多线程编译：通过 || true 阻断提前熔断
+          make -j$BUILD_THREADS V=s EXTRA_CFLAGS="-Wno-error -Wno-format-nonliteral -Wno-format-security" 2>&1 | tee build.log || true
+          
+          # 2. 检查 25.12 标准的红米 AX6000 FIT 固件 (*sysupgrade.itb) 是否生成
+          if ls bin/targets/mediatek/filogic/*sysupgrade.itb >/dev/null 2>&1; then
+            echo "========================================="
+            echo "🎉 恭喜！25.12 架构 *sysupgrade.itb 固件已完美产出！"
+            echo "========================================="
+          else
+            echo "========================================="
+            echo "🚨 未检测到 .itb 固件，多线程中途溃败！"
+            echo "🔄 开始单线程（-j1）冲刺，直击真正的编译 Error..."
+            echo "========================================="
+            
+            # 3. 单线程抓漏：不加 || true，让真正的凶手在日志最末尾现形
+            make -j1 V=s EXTRA_CFLAGS="-Wno-error -Wno-format-nonliteral -Wno-format-security" 2>&1 | tee single_build.log
+          fi
 
       - name: 检查编译产物
         working-directory: immortalwrt
