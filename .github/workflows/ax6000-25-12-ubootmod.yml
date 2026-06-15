@@ -180,7 +180,6 @@ jobs:
         run: |
           echo "=== 编译产物列表 ==="
           find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
-          rm -rf bin/packages
           rm -rf bin/targets/mediatek/filogic/packages
           rm -rf bin/targets/mediatek/filogic/*-bl2.bin
           cp .config bin/targets/mediatek/filogic/build.config
