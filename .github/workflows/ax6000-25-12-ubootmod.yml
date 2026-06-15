@@ -107,18 +107,10 @@ jobs:
         run: |
           git clone --depth 1 --single-branch --filter=blob:none -b $REPO_BRANCH $REPO_URL immortalwrt
 
-          cd ./immortalwrt
-          [ -e $CONFIG_FILE ] && cp $CONFIG_FILE ./.config
-          # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF ./feeds.conf.default
-
-          # 如果不存在 defconfig 则直接结束工作流
-          if [ ! -d "defconfig" ]; then
-            echo "defconfig directory not found, stopping workflow."
-            exit 0
-          fi
+          [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
 
           # GitHub Action 移除国内下载源
-          PROJECT_MIRRORS_FILE="./scripts/projectsmirrors.json"
+          PROJECT_MIRRORS_FILE="immortalwrt/scripts/projectsmirrors.json"
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
             sed -i '/.cn\//d; /tencent/d; /aliyun/d' "$PROJECT_MIRRORS_FILE"
           fi
