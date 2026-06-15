@@ -51,7 +51,6 @@ jobs:
         uses: actions/checkout@main
         with:
           fetch-depth: 1
-          single-branch: true
       
       # 动态提取并修改当前运行的名称
       - name: Dynamically Update Run Title
@@ -149,24 +148,8 @@ jobs:
           echo "========================================="
           echo "🚀 正在启动 25.12 架构多线程并行编译..."
           echo "========================================="
-          
-          # 1. 多线程编译：通过 || true 阻断提前熔断
-          make -j$BUILD_THREADS V=s 2>&1 | tee build.log || true
-          
-          # 2. 检查 25.12 标准的红米 AX6000 FIT 固件 (*sysupgrade.itb) 是否生成
-          if ls bin/targets/mediatek/filogic/*sysupgrade.itb >/dev/null 2>&1; then
-            echo "========================================="
-            echo "🎉 恭喜！25.12 架构 *sysupgrade.itb 固件已完美产出！"
-            echo "========================================="
-          else
-            echo "========================================="
-            echo "🚨 未检测到 .itb 固件，多线程中途溃败！"
-            echo "🔄 开始单线程（-j1）冲刺，直击真正的编译 Error..."
-            echo "========================================="
-            
-            # 3. 单线程抓漏：不加 || true，让真正的凶手在日志最末尾现形
-            make -j1 V=s 2>&1 | tee single_build.log
-          fi
+
+          make -j$BUILD_THREADS V=s 2>&1 | tee build.log
 
       - name: 检查编译产物
         working-directory: immortalwrt
@@ -209,7 +192,6 @@ jobs:
         run: |
           echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
           echo "- 构建版本: ${{ steps.commitversionmsg.outputs.T_TITLE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 构建时间: ${{ github.action_run.created_at }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- 运行编号: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           if [ -f immortalwrt/build.log ]; then
