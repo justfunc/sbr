@@ -76,8 +76,9 @@ jobs:
           sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android /opt/hostedtoolcache/CodeQL /opt/ghc /usr/local/share/powershell /usr/local/share/boost /usr/lib/jvm
           sudo -E apt-mark hold grub-efi-amd64-signed
           sudo -E apt -yqq purge azure-cli* docker* llvm* firefox google* powershell* mysql* php* snap*
-          sudo -E apt -yqq install dos2unix python3-netifaces libfuse-dev
+  
           sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+          sudo -E apt -yqq install dos2unix python3-netifaces libfuse-dev
           sudo -E systemctl daemon-reload
           sudo -E apt -yqq autoremove --purge
           sudo -E apt -yqq autoclean
