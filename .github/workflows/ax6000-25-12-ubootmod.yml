@@ -180,18 +180,15 @@ jobs:
         run: |
           echo "=== 编译产物列表 ==="
           find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
-          echo "=== 检查固件 ==="
-          ls -lh bin/targets/mediatek/filogic/*ubootmod* 2>/dev/null || echo "ubootmod 版本缺失"
-          ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" | wc -l | tr -d ' ')
-          echo "ubootmod 固件数量: ${ubootmod_count}"
           rm -rf bin/packages
           rm -rf bin/targets/mediatek/filogic/packages
+          rm -rf bin/targets/mediatek/filogic/*-bl2.bin
           cp .config bin/targets/mediatek/filogic/build.config
 
       - name: 上传编译产物
         uses: actions/upload-artifact@main
         with:
-          name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}
+          name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}-${{ steps.commitversionmsg.outputs.SHORT_SHA }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15
