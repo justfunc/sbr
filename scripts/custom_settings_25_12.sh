@@ -15,20 +15,17 @@ sed -i 's/ImmortalWrt/gwrt/g' package/base-files/files/bin/config_generate
 # sed -i 's/luci-theme-bootstrap/luci-theme-aurora/g' feeds/luci/collections/luci/Makefile
 
 # add date in output file name
-sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d%H%M%S)' \
-       -e '/^IMG_PREFIX:=/ s/\($(SUBTARGET)\)/\1-25-12-$(BUILD_DATE)/' include/image.mk
+# sed -i -e '/^IMG_PREFIX:=/i BUILD_DATE := $(shell date +%Y%m%d%H%M%S)' \
+#        -e '/^IMG_PREFIX:=/ s/\($(SUBTARGET)\)/\1-25-12-$(BUILD_DATE)/' include/image.mk
 
-
-# 获取当前北京时间 (UTC+8)
-BUILD_DATE=$(date -u -d "+8 hours" "+%Y-%m-%d %H:%M:%S")
 # banner中加入构建时间
-echo -e "\n Build: $BUILD_DATE by Justfunc" >> package/base-files/files/etc/banner
+echo -e "\n Build: $WRT_DATE by Justfunc" >> package/base-files/files/etc/banner
 echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
 echo "export LANG=en_US.UTF-8" >> package/base-files/files/etc/profile
 
 #添加编译日期标识
-sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $BUILD_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
-sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ gwrt-$BUILD_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $WRT_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ gwrt-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
 # Modify filogic.mk for Big Partition Support
 TARGET_FILE="target/linux/mediatek/image/filogic.mk"

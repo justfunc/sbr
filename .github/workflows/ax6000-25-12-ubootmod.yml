@@ -35,8 +35,7 @@ env:
   DIY_P2_SH: scripts/custom_settings_25_12.sh
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
-  FEEDS_CONF: 25-12-feeds.conf
-  REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase.git
+  REPO_SOURCE: chasey-dev/immortalwrt-mt798x-rebase
   REPO_BRANCH: 25.12
   WRT_TEST: ${{inputs.WRT_TEST}}
   GH_TOKEN: ${{ github.token }}
@@ -68,14 +67,11 @@ jobs:
           echo "T_TITLE=$TARGET_TITLE" >> $GITHUB_OUTPUT
           echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "REPO_URL=https://github.com/${REPO_SOURCE}.git >> $GITHUB_ENV
           echo "WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d-%H.%M.%S")" >> $GITHUB_ENV
           echo "WRT_MARK=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
-          echo "WRT_INFO=${REPO_URL%%/*}" >> $GITHUB_ENV
-          echo "WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' ./defconfig/$CONFIG_FILE)" >> $GITHUB_ENV
-
-      - name: "Current version: ${{ steps.commitversionmsg.outputs.T_TITLE }}"
-        run: |
-          echo "当前版本：${{ steps.commitversionmsg.outputs.T_TITLE }}"
+          echo "WRT_INFO=${REPO_SOURCE%%/*}" >> $GITHUB_ENV
+          echo "WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' ./$CONFIG_FILE)" >> $GITHUB_ENV
 
       - name: Initialization Environment
         env:
@@ -235,7 +231,7 @@ jobs:
       - name: 上传编译产物
         uses: actions/upload-artifact@main
         with:
-          name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}-${{ steps.commitversionmsg.outputs.SHORT_SHA }}
+          name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}-${{ env.WRT_DATE }}-${{ steps.commitversionmsg.outputs.SHORT_SHA }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15
@@ -259,6 +255,7 @@ jobs:
         if: always()
         run: |
           echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建时间: ${{ env.WRT_DATE }}"
           echo "- 构建版本: ${{ steps.commitversionmsg.outputs.T_TITLE }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- 运行编号: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
