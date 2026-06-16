@@ -231,7 +231,7 @@ jobs:
       - name: 上传编译产物
         uses: actions/upload-artifact@main
         with:
-          name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ github.run_number }}-${{ env.WRT_DATE }}-${{ steps.commitversionmsg.outputs.SHORT_SHA }}
+          name: ImmortalWrt-25-12-6-12-Redmi-AX6000-${{ env.WRT_DATE }}-${{ github.run_number }}-${{ steps.commitversionmsg.outputs.SHORT_SHA }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15
