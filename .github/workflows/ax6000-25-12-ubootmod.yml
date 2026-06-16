@@ -121,44 +121,6 @@ jobs:
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
             sed -i '/.cn\//d; /tencent/d; /aliyun/d' "$PROJECT_MIRRORS_FILE"
           fi
-
-      - name: Check Caches
-        id: check-cache
-        if: env.WRT_TEST != 'true'
-        uses: actions/cache@main
-        with:
-          key: ${{ github.event.inputs.config_file }}-${{env.WRT_INFO}}-${{env.WRT_HASH}}
-          restore-keys: ${{ github.event.inputs.config_file }}-${{env.WRT_INFO}}
-          path: |
-            ./immortalwrt/dl
-            ./immortalwrt/.ccache
-            ./immortalwrt/staging_dir/host*
-            ./immortalwrt/staging_dir/tool*
-
-      - name: Update Caches
-        working-directory: immortalwrt
-        if: env.WRT_TEST != 'true'
-        run: |
-          if [ -d "./immortalwrt/staging_dir" ]; then
-            find "./immortalwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
-              find "$DIR" -type f -exec touch {} +
-            done
-
-            mkdir -p ./immortalwrt/tmp && echo "1" > ./immortalwrt/tmp/.build
-
-            echo "toolchain skiped done!"
-          else
-            echo "caches missed!"
-          fi
-
-          if ${{steps.check-cache.outputs.cache-hit != 'true'}}; then
-            CACHE_LIST=$(gh cache list --key "$CONFIG_FILE-$WRT_INFO" | cut -f 1)
-            for CACHE_KEY in $CACHE_LIST; do
-              gh cache delete $CACHE_KEY
-            done
-
-            echo "caches cleanup done!"
-          fi
           
       - name: Update Install Feeds
         working-directory: immortalwrt
