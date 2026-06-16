@@ -26,6 +26,10 @@ on:
         options:
           - none
           - custom_feeds_25_12
+      WRT_TEST:
+        required: false
+        default: false
+        type: string
 
 env:
   DIY_P2_SH: scripts/custom_settings_25_12.sh
@@ -34,6 +38,7 @@ env:
   FEEDS_CONF: 25-12-feeds.conf
   REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase.git
   REPO_BRANCH: 25.12
+  WRT_TEST: ${{inputs.WRT_TEST}}
 
 jobs:
   build:
@@ -53,8 +58,7 @@ jobs:
         with:
           fetch-depth: 1
       
-      # 动态提取并修改当前运行的名称
-      - name: Dynamically Update Run Title
+      - name: Initialization Values
         id: commitversionmsg
         run: |
           SHORT_SHA=$(git rev-parse --short HEAD)
@@ -63,12 +67,16 @@ jobs:
           echo "T_TITLE=$TARGET_TITLE" >> $GITHUB_OUTPUT
           echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d-%H.%M.%S")" >> $GITHUB_ENV
+          echo "WRT_MARK=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
+          echo "WRT_INFO=${REPO_URL%%/*}" >> $GITHUB_ENV
+          echo "WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' ./defconfig/$CONFIG_FILE)" >> $GITHUB_ENV
 
       - name: "Current version: ${{ steps.commitversionmsg.outputs.T_TITLE }}"
         run: |
           echo "当前版本：${{ steps.commitversionmsg.outputs.T_TITLE }}"
 
-      - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
+      - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -103,26 +111,62 @@ jobs:
           sudo swapon /swapfile
           free -h
 
-      - name: 检出最新代码
+      - name: Clone Code
         run: |
           git clone --depth 1 --single-branch --filter=blob:none -b $REPO_BRANCH $REPO_URL immortalwrt
 
           [ -e $CONFIG_FILE ] && cp $CONFIG_FILE immortalwrt/.config
 
+          cd immortalwrt
+          echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
           # GitHub Action 移除国内下载源
-          PROJECT_MIRRORS_FILE="immortalwrt/scripts/projectsmirrors.json"
+          PROJECT_MIRRORS_FILE="scripts/projectsmirrors.json"
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
             sed -i '/.cn\//d; /tencent/d; /aliyun/d' "$PROJECT_MIRRORS_FILE"
           fi
+
+      - name: Check Caches
+        id: check-cache
+        if: env.WRT_TEST != 'true'
+        uses: actions/cache@main
+        working-directory: immortalwrt
+        with:
+          key: ${{env.CONFIG_FILE}}-${{env.WRT_INFO}}-${{env.WRT_HASH}}
+          restore-keys: ${{env.CONFIG_FILE}}-${{env.WRT_INFO}}
+          path: |
+            ./.ccache
+            ./staging_dir/host*
+            ./staging_dir/tool*
+
+      - name: Update Caches
+        working-directory: immortalwrt
+        if: env.WRT_TEST != 'true'
+        run: |
+          if [ -d "./staging_dir" ]; then
+            find "./staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+              find "$DIR" -type f -exec touch {} +
+            done
+
+            mkdir -p ./tmp && echo "1" > ./tmp/.build
+
+            echo "toolchain skiped done!"
+          else
+            echo "caches missed!"
+          fi
+
+          if ${{steps.check-cache.outputs.cache-hit != 'true'}}; then
+            CACHE_LIST=$(gh cache list --key "$CONFIG_FILE-$WRT_INFO" | cut -f 1)
+            for CACHE_KEY in $CACHE_LIST; do
+              gh cache delete $CACHE_KEY
+            done
+
+            echo "caches cleanup done!"
+          fi
           
-      - name: 更新 feeds
+      - name: Update Install Feeds
         working-directory: immortalwrt
         run: |
           ./scripts/feeds update -a
-  
-      - name: 安装 feeds
-        working-directory: immortalwrt
-        run: |
           ./scripts/feeds install -a
 
       - name: Custom Packages
@@ -131,7 +175,7 @@ jobs:
         run: |
           bash $GITHUB_WORKSPACE/scripts/${{ github.event.inputs.diy-part1_sh }}.sh
 
-      - name: Load custom configuration （加载自定义配置 custom_settings.sh）
+      - name: Load custom configuration
         working-directory: immortalwrt
         run: |
           bash $GITHUB_WORKSPACE/$DIY_P2_SH
@@ -147,16 +191,18 @@ jobs:
         run: |
           make defconfig -j$(nproc) && make clean -j$(nproc)
 
-      - name: 下载源码（加速后续编译）
+      - name: Download Packages
         working-directory: immortalwrt
+        if: env.WRT_TEST != 'true'
         run: |
           make download -j$(nproc) || {
             echo "首次下载失败，重试中..."
             make download -j1 || true
           }
 
-      - name: 编译固件
+      - name: Compile Firmware
         working-directory: immortalwrt
+        if: env.WRT_TEST != 'true'
         run: |
           BUILD_THREADS=$(nproc)
           echo "Using $BUILD_THREADS threads"
@@ -165,11 +211,20 @@ jobs:
           echo "🚀 正在启动 25.12 架构多线程并行编译..."
           echo "========================================="
 
-          make -j$BUILD_THREADS V=s 2>&1 | tee build.log
+          make -j$BUILD_THREADS V=s 2>&1 | tee build.log || make -j1 V=s | tee build-single.log
 
       - name: 检查编译产物
         working-directory: immortalwrt
         run: |
+          echo "-----Machine Info------"
+          echo "======================="
+          lscpu | grep -E "name|Core|Thread"
+          echo "======================="
+          df -h
+          echo "======================="
+          du -h --max-depth=1
+          echo "======================="
+          
           echo "=== 编译产物列表 ==="
           find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
           rm -rf bin/targets/mediatek/filogic/packages
