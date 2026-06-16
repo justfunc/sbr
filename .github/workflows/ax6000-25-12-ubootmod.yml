@@ -127,8 +127,8 @@ jobs:
         if: env.WRT_TEST != 'true'
         uses: actions/cache@main
         with:
-          key: ${{env.CONFIG_FILE}}-${{env.WRT_INFO}}-${{env.WRT_HASH}}
-          restore-keys: ${{env.CONFIG_FILE}}-${{env.WRT_INFO}}
+          key: ${{ github.event.inputs.config_file }}-${{env.WRT_INFO}}-${{env.WRT_HASH}}
+          restore-keys: ${{ github.event.inputs.config_file }}-${{env.WRT_INFO}}
           path: |
             ./immortalwrt/dl
             ./immortalwrt/.ccache
