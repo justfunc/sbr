@@ -134,6 +134,7 @@ jobs:
           key: ${{env.CONFIG_FILE}}-${{env.WRT_INFO}}-${{env.WRT_HASH}}
           restore-keys: ${{env.CONFIG_FILE}}-${{env.WRT_INFO}}
           path: |
+            ./immortalwrt/dl
             ./immortalwrt/.ccache
             ./immortalwrt/staging_dir/host*
             ./immortalwrt/staging_dir/tool*
