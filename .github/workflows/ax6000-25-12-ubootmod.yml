@@ -255,7 +255,7 @@ jobs:
         if: always()
         run: |
           echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
-          echo "- 构建时间: ${{ env.WRT_DATE }}"
+          echo "- 构建时间: ${{ env.WRT_DATE }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建版本: ${{ steps.commitversionmsg.outputs.T_TITLE }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- 运行编号: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
