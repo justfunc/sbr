@@ -39,6 +39,7 @@ env:
   REPO_URL: https://github.com/chasey-dev/immortalwrt-mt798x-rebase.git
   REPO_BRANCH: 25.12
   WRT_TEST: ${{inputs.WRT_TEST}}
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   build:
