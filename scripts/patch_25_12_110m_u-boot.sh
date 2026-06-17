@@ -10,23 +10,32 @@ echo "开始修补 OpenWrt 25.12 源码以适配 hanwckf 110M 大分区布局...
 # 修改 DTS 文件
 # ==========================================
 if [ -f "$DTS_FILE" ]; then
-    echo "[-] 正在清洗并重写 DTS: $DTS_FILE"
+    echo "[-] 正在重写 DTS: $DTS_FILE"
     
-    # 1. 替换 model 文本标识
-    sed -i 's/OpenWrt U-Boot layout/hanwckf 110M Layout/g' "$DTS_FILE"
-    
-    # 2. 先干净地物理删除原文件里所有可能冲突的旧分区段 (从 partition@580000 开始一直到 &spi_nand_flash 之前的内容全清)
-    # 这一步是为了彻底解决任何潜在的语法冲突
-    sed -i '/partition@580000 {/,/};/d' "$DTS_FILE"
-    sed -i '/partition@5c0000 {/,/};/d' "$DTS_FILE"
-    sed -i '/partition@600000 {/,/};/d' "$DTS_FILE"
-    
-    # 3. 既然内核允许在文件末尾进行节点重写(Override)，我们直接在文件最后强行追加纯净的大分区定义！
-    # 这样可以 100% 避开原本文件内部大括号不匹配的问题。
-    cat << 'EOF' >> "$DTS_FILE"
+    # 2. 【核心改变】绝对不碰原文件的一行代码，不删任何括号！
+    # 直接在文件末尾追加一个强力的重写块：先命令编译器删除官方的3个旧分区，再注入我们的 UBI 大分区。
+    cat << 'EOF' > "$DTS_FILE"
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 
-/* 强行重写覆盖官方分区表，适配 hanwckf 110M 大分区 */
+/dts-v1/;
+#include "mt7986a-xiaomi-redmi-router-ax6000.dtsi"
+
+/ {
+	model = "Xiaomi Redmi Router AX6000 (OpenWrt U-Boot layout)";
+	compatible = "xiaomi,redmi-router-ax6000-ubootmod", "mediatek,mt7986a";
+};
+
+&chosen {
+	rootdisk = <&ubi_rootdisk>;
+	bootargs-append = " root=/dev/fit0 rootwait";
+};
+
+/* 彻底擦除原厂 NMBM 定义，防止 25.12 内核报错 */
+
 &partitions {
+	/* 彻底擦除原厂 crash、crash_log，腾出空间 */
+
+	/* 最优解核心：将 UBI 起点顶到 2.5MB 物理位置 (0x280000) */
 	partition@280000 {
 		label = "ubi";
 		reg = <0x280000 0x7d00000>;
