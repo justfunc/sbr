@@ -27,15 +27,17 @@ echo "export LANG=en_US.UTF-8" >> package/base-files/files/etc/profile
 sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $WRT_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ gwrt-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
-# # Modify filogic.mk for Big Partition Support
-# TARGET_FILE="target/linux/mediatek/image/filogic.mk"
-          
-# # 定义需要插入的两行代码
-# INSERT_TEXT="  SUPPORTED_DEVICES := xiaomi,redmi-router-ax6000-ubootmod xiaomi,redmi-router-ax6000\n  IMAGE_SIZE := 114688k"
+# Modify filogic.mk for Big Partition Support
+if [ "$PATCH_110M" = "true" ]; then
+    TARGET_FILE="target/linux/mediatek/image/filogic.mk"
+            
+    # 定义需要插入的两行代码
+    INSERT_TEXT="  SUPPORTED_DEVICES := xiaomi,redmi-router-ax6000-ubootmod xiaomi,redmi-router-ax6000\n  IMAGE_SIZE := 114688k"
 
-# # 使用 sed 匹配到目标行，并在其下一行（a命令）追加内容
-# sed -i "/define Device\/xiaomi_redmi-router-ax6000-ubootmod/a $INSERT_TEXT" "$TARGET_FILE"
+    # 使用 sed 匹配到目标行，并在其下一行（a命令）追加内容
+    sed -i "/define Device\/xiaomi_redmi-router-ax6000-ubootmod/a $INSERT_TEXT" "$TARGET_FILE"
 
-# # 打印修改后的内容片段，方便在 Actions 日志中确认检查
-# echo "==== Check filogic.mk Modification ===="
-# sed -n '/define Device\/xiaomi_redmi-router-ax6000-ubootmod/,+5p' "$TARGET_FILE"
+    # 打印修改后的内容片段，方便在 Actions 日志中确认检查
+    echo "==== Check filogic.mk Modification ===="
+    sed -n '/define Device\/xiaomi_redmi-router-ax6000-ubootmod/,+5p' "$TARGET_FILE"
+fi

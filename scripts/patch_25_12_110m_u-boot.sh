@@ -45,6 +45,8 @@ else
     exit 1
 fi
 
+echo "--- $PATCH_110M"
+
 pwd
 ls
 ls target/linux/mediatek/image

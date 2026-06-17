@@ -44,6 +44,7 @@ env:
   REPO_SOURCE: chasey-dev/immortalwrt-mt798x-rebase
   REPO_BRANCH: 25.12
   GH_TOKEN: ${{ github.token }}
+  PATCH_110M: ${{ inputs.PATCH_110M }}
 
 jobs:
   build:
@@ -129,6 +130,7 @@ jobs:
       
       - name: Patch for hanwckf 110M U-Boot
         if: ${{ inputs.patch_110m }}
+        working-directory: immortalwrt
         run: |
           bash $GITHUB_WORKSPACE/scripts/patch_25_12_110m_u-boot.sh
 
