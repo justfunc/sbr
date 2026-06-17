@@ -182,7 +182,7 @@ jobs:
           echo "🚀 正在启动 25.12 架构多线程并行编译..."
           echo "========================================="
 
-          make -j$BUILD_THREADS V=s 2>&1 | tee build.log || make -j1 V=s | tee build-single.log
+          make -j$BUILD_THREADS V=s 2>&1 | tee build.log || make -j1 V=s 2>&1 | tee build-single.log
 
       - name: 检查编译产物
         working-directory: immortalwrt
