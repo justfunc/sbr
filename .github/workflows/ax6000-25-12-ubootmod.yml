@@ -130,7 +130,7 @@ jobs:
       - name: Patch for hanwckf 110M U-Boot
         if: ${{ inputs.patch_110m }}
         run: |
-          bash $GITHUB_WORKSPACE/scripts/patch_25_12_110m_uboot.sh
+          bash $GITHUB_WORKSPACE/scripts/patch_25_12_110m_u-boot.sh
 
       - name: Custom Packages
         working-directory: immortalwrt
