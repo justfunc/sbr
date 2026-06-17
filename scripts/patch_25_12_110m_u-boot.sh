@@ -45,6 +45,8 @@ else
     exit 1
 fi
 
+ls target/linux/mediatek/image
+
 # ==========================================
 # 修改 Makefile (filogic.mk)
 # ==========================================
