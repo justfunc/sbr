@@ -36,7 +36,7 @@ if [ -f "$DTS_FILE" ]; then
 	/* 彻底擦除原厂 crash、crash_log，腾出空间 */
 
 	/* 最优解核心：将 UBI 起点顶到 2.5MB 物理位置 (0x280000) */
-	partition@280000 {
+	ubi_rootdisk: partition@280000 {
 		label = "ubi";
 		reg = <0x280000 0x7d00000>;
 	};
