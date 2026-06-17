@@ -28,7 +28,7 @@ sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc A
 sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ gwrt-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
 # Modify filogic.mk for Big Partition Support
-if [ "$PATCH_110M" = "true" ]; then
+if [ "$PATCH_110M" != "true" ]; then
     TARGET_FILE="target/linux/mediatek/image/filogic.mk"
             
     # 定义需要插入的两行代码

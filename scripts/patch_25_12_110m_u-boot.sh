@@ -10,46 +10,35 @@ echo "开始修补 OpenWrt 25.12 源码以适配 hanwckf 110M 大分区布局...
 # 修改 DTS 文件
 # ==========================================
 if [ -f "$DTS_FILE" ]; then
-    echo "正在修改 DTS: $DTS_FILE"
+    echo "[-] 正在清洗并重写 DTS: $DTS_FILE"
     
-    # 使用 awk 精确替换 &partitions { ... }; 块内部的内容
-    # 将原本的 partition@580000, 5c0000, 600000 统一替换为 hanwckf 的 0x280000 独占大分区
-    awk '
-    BEGIN { inside_partitions = 0 }
-    /&partitions \{/ { 
-        print $0; 
-        print "\t/delete-node/ partition@580000;";
-        print "\t/delete-node/ partition@5c0000;";
-        print "\t/delete-node/ partition@600000;";
-        print "\tpartition@280000 {";
-        print "\t\tlabel = \"ubi\";";
-        print "\t\treg = <0x280000 0x7d00000>;";
-        print "\t};";
-        inside_partitions = 1; 
-        next 
-    }
-    inside_partitions == 1 { 
-        if ($0 ~ /\};/) { 
-            inside_partitions = 0; 
-            print $0; 
-            next 
-        } 
-        next 
-    }
-    { print }
-    ' "$DTS_FILE" > "${DTS_FILE}.tmp" && mv "${DTS_FILE}.tmp" "$DTS_FILE"
+    # 1. 替换 model 文本标识
+    sed -i 's/OpenWrt U-Boot layout/hanwckf 110M Layout/g' "$DTS_FILE"
+    
+    # 2. 先干净地物理删除原文件里所有可能冲突的旧分区段 (从 partition@580000 开始一直到 &spi_nand_flash 之前的内容全清)
+    # 这一步是为了彻底解决任何潜在的语法冲突
+    sed -i '/partition@580000 {/,/};/d' "$DTS_FILE"
+    sed -i '/partition@5c0000 {/,/};/d' "$DTS_FILE"
+    sed -i '/partition@600000 {/,/};/d' "$DTS_FILE"
+    
+    # 3. 既然内核允许在文件末尾进行节点重写(Override)，我们直接在文件最后强行追加纯净的大分区定义！
+    # 这样可以 100% 避开原本文件内部大括号不匹配的问题。
+    cat << 'EOF' >> "$DTS_FILE"
 
-    echo "DTS 修改完成。"
+/* 强行重写覆盖官方分区表，适配 hanwckf 110M 大分区 */
+&partitions {
+	partition@280000 {
+		label = "ubi";
+		reg = <0x280000 0x7d00000>;
+	};
+};
+EOF
+
+    echo "[✓] DTS 物理覆盖修改完成。"
 else
-    echo "错误: 未找到 DTS 文件 $DTS_FILE ，请检查源码分支是否正确！"
+    echo "[x] 错误: 未找到 DTS 文件 $DTS_FILE"
     exit 1
 fi
-
-echo "--- $PATCH_110M"
-
-pwd
-ls
-ls target/linux/mediatek/image
 
 # ==========================================
 # 修改 Makefile (filogic.mk)
@@ -106,7 +95,7 @@ echo ""
 echo "👉 [DTS 文件] 当前的分区表配置 (&partitions):"
 echo "----------------------------------------------------------"
 # 打印 DTS 中 &partitions 开始到结束的代码块
-sed -n '/&partitions {/,/};/p' "$DTS_FILE"
+cat "$DTS_FILE"
 echo "----------------------------------------------------------"
 
 echo ""
