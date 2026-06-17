@@ -29,7 +29,13 @@ on:
       WRT_TEST:
         required: false
         default: false
-        type: string
+        type: boolean
+        description: "是否开启 WRT 测试"
+      PATCH_110M:
+        required: false
+        default: false
+        type: boolean
+        description: "是否开启 110M U-Boot 补丁"
 
 env:
   DIY_P2_SH: scripts/custom_settings_25_12.sh
@@ -37,7 +43,6 @@ env:
   CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
   REPO_SOURCE: chasey-dev/immortalwrt-mt798x-rebase
   REPO_BRANCH: 25.12
-  WRT_TEST: ${{inputs.WRT_TEST}}
   GH_TOKEN: ${{ github.token }}
 
 jobs:
@@ -121,18 +126,23 @@ jobs:
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
             sed -i '/.cn\//d; /tencent/d; /aliyun/d' "$PROJECT_MIRRORS_FILE"
           fi
-          
-      - name: Update Install Feeds
-        working-directory: immortalwrt
+      
+      - name: Patch for hanwckf 110M U-Boot
+        if: ${{ inputs.patch_110m }}
         run: |
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          bash $GITHUB_WORKSPACE/scripts/patch_25_12_110m_uboot.sh
 
       - name: Custom Packages
         working-directory: immortalwrt
         if: ${{ github.event.inputs.diy-part1_sh != 'none' }}
         run: |
           bash $GITHUB_WORKSPACE/scripts/${{ github.event.inputs.diy-part1_sh }}.sh
+          
+      - name: Update Install Feeds
+        working-directory: immortalwrt
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
 
       - name: Load custom configuration
         working-directory: immortalwrt
@@ -152,7 +162,7 @@ jobs:
 
       - name: Download Packages
         working-directory: immortalwrt
-        if: env.WRT_TEST != 'true'
+        if: inputs.WRT_TEST != true
         run: |
           make download -j$(nproc) || {
             echo "首次下载失败，重试中..."
@@ -161,7 +171,7 @@ jobs:
 
       - name: Compile Firmware
         working-directory: immortalwrt
-        if: env.WRT_TEST != 'true'
+        if: inputs.WRT_TEST != true
         run: |
           BUILD_THREADS=$(nproc)
           echo "Using $BUILD_THREADS threads"
