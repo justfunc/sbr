@@ -45,6 +45,8 @@ else
     exit 1
 fi
 
+pwd
+ls
 ls target/linux/mediatek/image
 
 # ==========================================
