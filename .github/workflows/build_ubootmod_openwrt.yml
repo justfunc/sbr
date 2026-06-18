@@ -17,11 +17,11 @@ on:
         required: false
         default: false
         type: boolean
-      ubootmod_patch:
-        description: "是否应用 ubootmod 补丁"
+      PATCH_110M:
         required: false
         default: false
         type: boolean
+        description: "是否开启 110M U-Boot 补丁"
 
 env:
   DIY_P1_SH: scripts/custom_feeds.sh
@@ -103,13 +103,11 @@ jobs:
         run: |
           git clone  -b ${REPO_BRANCH} --depth 1 --single-branch --filter=blob:none ${REPO_URL} immortalwrt
 
-      - name: 应用 ubootmod 补丁
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ubootmod_patch }}
+      - name: Patch for hanwckf 110M U-Boot
+        if: ${{ inputs.patch_110m }}
+        working-directory: immortalwrt
         run: |
-          bash $GITHUB_WORKSPACE/scripts/apply_ubootmod_patches.sh
-          echo "=== 当前 AX6000 DTS ==="
-          cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
-          grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
+          bash $GITHUB_WORKSPACE/scripts/patch_24_10_110m_u-boot.sh
       
       - name: Load config files
         run: |
