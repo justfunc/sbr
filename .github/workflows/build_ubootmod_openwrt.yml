@@ -29,7 +29,7 @@ env:
   TZ: Asia/Shanghai
   CONFIG_FILE: defconfig/${{ inputs.config_file }}.config
   FEEDS_CONF: feeds.conf.default
-  REPO_SOURCE: chasey-dev/immortalwrt-mt798x-rebase
+  REPO_SOURCE: Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly
   REPO_BRANCH: openwrt-24.10-6.6
 
 jobs:
