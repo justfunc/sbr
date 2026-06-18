@@ -105,8 +105,7 @@ jobs:
           echo "初始磁盘空间:"
           df -hT
 
-      - name: Optimize Disk Space and Expand Swap
-        run: |
+          # Optimize Disk Space and Expand Swap
           sudo swapoff -a
           sudo dd if=/dev/zero of=/swapfile bs=1M count=10240
           sudo chmod 600 /swapfile
@@ -229,6 +228,8 @@ jobs:
         if: always()
         run: |
           echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建源码: ${{ env.REPO_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 源码分支: ${{ env.REPO_BRANCH }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建时间: ${{ env.WRT_DATE }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建版本: ${{ steps.commitversionmsg.outputs.T_TITLE }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY

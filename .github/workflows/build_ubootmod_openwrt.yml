@@ -27,14 +27,15 @@ env:
   DIY_P1_SH: scripts/custom_feeds.sh
   DIY_P2_SH: scripts/custom_settings.sh
   TZ: Asia/Shanghai
-  CONFIG_FILE: defconfig/${{ github.event.inputs.config_file }}.config
+  CONFIG_FILE: defconfig/${{ inputs.config_file }}.config
   FEEDS_CONF: feeds.conf.default
-  REPO_URL: https://github.com/Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly.git
+  REPO_SOURCE: chasey-dev/immortalwrt-mt798x-rebase
   REPO_BRANCH: openwrt-24.10-6.6
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # OpenWrt 推荐版本，稳定性高
+    name: ImmortalWrt-24-10_6.6-Redmi-AX6000 Build ${{ github.sha }}
+    runs-on: ubuntu-latest
     steps:
 
       - name: 输入参数
@@ -42,38 +43,63 @@ jobs:
           echo "输入参数："
           echo "  配置文件: ${CONFIG_FILE}"
           echo "  开启 SSH: ${{inputs.ssh_enabled}}"
+          echo "  当前提交： ${{ github.sha }}"
 
       - name: Check out
         uses: actions/checkout@main
+        with:
+          fetch-depth: 1
 
-      - name: 安装编译环境依赖（官方 ImmortalWrt 脚本）
+      - name: Initialization Values
+        id: commitversionmsg
         run: |
-          sudo -E apt -yqq purge firefox
-          # sudo bash -c "$(curl -fsSL https://build-scripts.immortalwrt.org/init_build_environment.sh)"
-          sudo apt update -y
-          sudo apt full-upgrade -y
-          sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-            bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext gcc-multilib \
-            g++-multilib git gnutls-dev gperf haveged help2man intltool lib32gcc-s1 libc6-dev-i386 libelf-dev \
-            libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libpython3-dev \
-            libreadline-dev libssl-dev libtool libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano \
-            ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils \
-            python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
-            upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
-          sudo apt -yqq install dos2unix python3-netifaces libfuse-dev
-          # 添加 pnpm 依赖
-          npm install -g pnpm
-          sudo apt -yqq autoremove --purge
-          sudo apt -yqq autoclean
-          sudo apt -yqq clean
-          sudo systemctl daemon-reload
-          sudo timedatectl set-timezone "$TZ"
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          TARGET_TITLE="[${SHORT_SHA}] - ${COMMIT_MSG}"
+          echo "T_TITLE=$TARGET_TITLE" >> $GITHUB_OUTPUT
+          echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "REPO_URL=https://github.com/${REPO_SOURCE}.git" >> $GITHUB_ENV
+          echo "WRT_DATE=$(TZ=UTC-8 date +"%y-%m-%d-%H.%M.%S")" >> $GITHUB_ENV
+          echo "WRT_MARK=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
+          echo "WRT_INFO=${REPO_SOURCE%%/*}" >> $GITHUB_ENV
+          echo "WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' ./$CONFIG_FILE)" >> $GITHUB_ENV
+
+      - name: Initialization Environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo docker image prune --all --force
+          sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android /opt/hostedtoolcache/CodeQL /opt/ghc /usr/local/share/powershell /usr/local/share/boost /usr/lib/jvm
+          sudo -E apt-mark hold grub-efi-amd64-signed
+          sudo -E apt -yqq purge azure-cli* docker* llvm* firefox google* powershell* mysql* php* snap*
+          sudo -E apt -yqq update
+          sudo -E apt -yqq full-upgrade
+          sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+          sudo -E systemctl daemon-reload
+          sudo -E apt -yqq autoremove --purge
+          sudo -E apt -yqq autoclean
+          sudo -E apt -yqq clean
+          sudo -E timedatectl set-timezone "$TZ"
+          
           sudo mkdir immortalwrt
           sudo chown $USER:$GROUPS immortalwrt
+          
+          # 添加 pnpm 依赖
+          npm install -g pnpm
+          
           echo "初始磁盘空间:"
           df -hT
 
-      - name: 检出最新代码（padavanonly/immortalwrt-mt798x-6.6）
+          # Optimize Disk Space and Expand Swap
+          sudo swapoff -a
+          sudo dd if=/dev/zero of=/swapfile bs=1M count=10240
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
+      - name: Clone Code
         run: |
           git clone  -b ${REPO_BRANCH} --depth 1 --single-branch --filter=blob:none ${REPO_URL} immortalwrt
 
@@ -85,29 +111,25 @@ jobs:
           cat immortalwrt/target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts
           grep -A 30 "define Device/xiaomi_redmi-router-ax6000-ubootmod" immortalwrt/target/linux/mediatek/image/filogic.mk
       
-      - name: 加载配置文件
+      - name: Load config files
         run: |
           # [ -e files ] && rm -rf immortalwrt/files && cp -rf ./files immortalwrt/
           # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF immortalwrt/feeds.conf.default
-          cp $GITHUB_WORKSPACE/$CONFIG_FILE immortalwrt/.config
+          [ -e $CONFIG_FILE ] && cp $GITHUB_WORKSPACE/$CONFIG_FILE immortalwrt/.config
 
-      - name: Load custom feeds （加载自定义 Feeds custom_feeds.sh）
+      - name: Load custom feeds
         working-directory: immortalwrt
         run: |
           bash $GITHUB_WORKSPACE/$DIY_P1_SH
 
-      - name: 更新 feeds
+      - name: Update & Install feeds
         working-directory: immortalwrt
         run: |
           ./scripts/feeds update -a
-
-
-      - name: 安装 feeds
-        working-directory: immortalwrt
-        run: |
           ./scripts/feeds install -a
+          
 
-      - name: Load custom configuration （加载自定义配置 custom_settings.sh）
+      - name: Load custom configuration
         working-directory: immortalwrt
         run: |
           rm -rf files
@@ -122,7 +144,7 @@ jobs:
       - name: 加载 Redmi AX6000 配置
         working-directory: immortalwrt
         run: |
-          make defconfig
+          make defconfig -j$(nproc) && make clean -j$(nproc)
 
       - name: 下载源码
         working-directory: immortalwrt
@@ -135,21 +157,24 @@ jobs:
       - name: 编译固件
         working-directory: immortalwrt
         run: |
-          set -o pipefail
           make -j$(nproc) V=s 2>&1 | tee build.log
 
       - name: 检查&整理编译产物
         if: success()
         working-directory: immortalwrt
         run: |
+          echo "-----Machine Info------"
+          echo "======================="
+          lscpu | grep -E "name|Core|Thread"
+          echo "======================="
+          df -h
+          echo "======================="
+          du -h --max-depth=1
+          echo "======================="
           echo "=== 编译产物列表 ==="
           find bin/targets/mediatek/filogic/ -type f \( -name "*.squashfs*" -o -name "*.bin" -o -name "*.sysupgrade" -o -name "*.itb" -o -name "*.ubi" -o -name "*.fip" \) 2>/dev/null || echo "未找到编译产物"
-          echo "=== 检查固件 ==="
-          ls -lh bin/targets/mediatek/filogic/*ubootmod* 2>/dev/null || echo "ubootmod 版本缺失"
-          ubootmod_count=$(find bin/targets/mediatek/filogic/ -maxdepth 1 -type f -name "*ubootmod*" 2>/dev/null | wc -l | tr -d ' ')
-          echo "ubootmod 固件数量: ${ubootmod_count}"
-          rm -rf bin/packages 2>/dev/null || true
           rm -rf bin/targets/mediatek/filogic/packages 2>/dev/null || true
+          rm -rf bin/targets/mediatek/filogic/*-bl2.bin
           cp .config bin/targets/mediatek/filogic/build.config 2>/dev/null || true
 
       - name: 上传编译产物
@@ -157,7 +182,7 @@ jobs:
         uses: actions/upload-artifact@main
         continue-on-error: true
         with:
-          name: ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ github.run_number }}
+          name: ImmortalWrt-24-10-6-6-Redmi-AX6000-${{ env.WRT_DATE }}-${{ github.run_number }}-${{ steps.commitversionmsg.outputs.SHORT_SHA }}
           path: |
             immortalwrt/bin/targets/mediatek/filogic
           retention-days: 15
@@ -181,6 +206,10 @@ jobs:
         if: success()
         run: |
           echo "## 构建结果" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建源码: ${{ env.REPO_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 源码分支: ${{ env.REPO_BRANCH }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建时间: ${{ env.WRT_DATE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建版本: ${{ steps.commitversionmsg.outputs.T_TITLE }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- 运行编号: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           if [ -f immortalwrt/build.log ]; then
