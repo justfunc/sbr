@@ -74,7 +74,7 @@ define Device/xiaomi_redmi-router-ax6000-ubootmod
   DEVICE_VARIANT := (OpenWrt U-Boot layout)
   DEVICE_DTS := mt7986a-xiaomi-redmi-router-ax6000-ubootmod
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-leds-ws2812b kmod-mt7915e kmod-mt7986-firmware mt7986-wo-firmware
+  DEVICE_PACKAGES := kmod-leds-ws2812b
   KERNEL_INITRAMFS_SUFFIX := -recovery.itb
   UBINI_OPTS := -E 5
   BLOCKSIZE := 128k
