@@ -104,7 +104,7 @@ jobs:
           git clone  -b ${REPO_BRANCH} --depth 1 --single-branch --filter=blob:none ${REPO_URL} immortalwrt
 
       - name: Patch for hanwckf 110M U-Boot
-        if: ${{ inputs.patch_110m }}
+        if: ${{ inputs.PATCH_110M }}
         working-directory: immortalwrt
         run: |
           bash $GITHUB_WORKSPACE/scripts/patch_24_10_110m_u-boot.sh
