@@ -22,6 +22,7 @@ sed -i 's/ImmortalWrt/Gwrt/g' package/base-files/files/bin/config_generate
 echo -e "\n Build By Justfunc At $WRT_DATE" >> package/base-files/files/etc/banner
 echo " -----------------------------------------------------" >> package/base-files/files/etc/banner
 echo "export LANG=en_US.UTF-8" >> package/base-files/files/etc/profile
+echo "export LC_CTYPE=en_US.UTF-8" >> package/base-files/files/etc/etc/profile
 
 #添加编译日期标识
 sed -i "s/\(_('Kernel Version'), *boardinfo.kernel\)/\1 + ' (Build By Justfunc At $WRT_DATE)'/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
