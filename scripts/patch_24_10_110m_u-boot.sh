@@ -26,16 +26,16 @@ if [ -f "$DTS_FILE" ]; then
 };
 
 &spi_nand_flash {
-        mediatek,nmbm;
-        mediatek,bmt-max-ratio = <1>;
-        mediatek,bmt-max-reserved-blocks = <64>;
+  mediatek,nmbm;
+  mediatek,bmt-max-ratio = <1>;
+  mediatek,bmt-max-reserved-blocks = <64>;
 };
 
 &partitions {
 	partition@580000 {
-        label = "ubi";
-		reg = <0x600000 0x6e00000>;
-    };
+    label = "ubi";
+		reg = <0x580000 0x6e80000>;
+  };
 };
 EOF
 
