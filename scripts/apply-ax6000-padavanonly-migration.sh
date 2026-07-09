@@ -18,8 +18,8 @@
 set -euo pipefail
 
 # 以脚本所在仓库的根为基准（如果你的 OpenWrt 源码在子目录，改这里）
-DTS_PATH="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts"
-MK_PATH="target/linux/mediatek/image/filogic.mk"
+DTS_PATH="target/linux/mediatek/dts-ext/mt7986a-xiaomi-redmi-router-ax6000-mtkuboot.dts"
+MK_PATH="target/linux/mediatek/image/filogic-ext.mk"
 
 echo "==> OpenWrt root: $(pwd)"
 
@@ -36,10 +36,10 @@ cat > "$DTS_PATH" <<'DTS_EOF'
 // SPDX-License-Identifier: (GPL-2.0 OR MIT)
 
 /dts-v1/;
-#include "mt7986a-xiaomi-redmi-router-ax6000.dtsi"
+#include "../dts/mt7986a-xiaomi-redmi-router-ax6000.dtsi"
 
 / {
-	model = "Xiaomi Redmi Router AX6000 (OpenWrt U-Boot layout)";
+	model = "Xiaomi Redmi Router AX6000 (MTK U-Boot layout)";
 	compatible = "xiaomi,redmi-router-ax6000-ubootmod", "mediatek,mt7986a";
 };
 
@@ -77,31 +77,26 @@ mk_path = sys.argv[1]
 with open(mk_path, "r", encoding="utf-8") as f:
     content = f.read()
 
-new_block = '''define Device/xiaomi_redmi-router-ax6000-ubootmod
+new_block = '''define Device/xiaomi_redmi-router-ax6000-mtkuboot
   DEVICE_VENDOR := Xiaomi
   DEVICE_MODEL := Redmi Router AX6000
-  DEVICE_VARIANT := (OpenWrt U-Boot layout)
-  DEVICE_DTS := mt7986a-xiaomi-redmi-router-ax6000-ubootmod
-  DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-leds-ws2812b kmod-mt7915e kmod-mt7986-firmware mt7986-wo-firmware
-  KERNEL_INITRAMFS_SUFFIX := -recovery.itb
+  DEVICE_VARIANT := (MTK U-Boot layout)
+  DEVICE_DTS := mt7986a-xiaomi-redmi-router-ax6000-mtkuboot
+  DEVICE_DTS_DIR := ../dts-ext
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k
   PAGESIZE := 2048
-  UBOOTENV_IN_UBI := 1
+  IMAGE_SIZE := 113152k
+  KERNEL_IN_UBI := 1
+  IMAGES += factory.bin
+  IMAGE/factory.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
-  ARTIFACTS := preloader.bin bl31-uboot.fip
-  ARTIFACT/preloader.bin := mt7986-bl2 spim-nand-ddr4
-  ARTIFACT/bl31-uboot.fip := mt7986-bl31-uboot xiaomi_redmi-router-ax6000
-ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
-  ARTIFACTS += initramfs-factory.ubi
-  ARTIFACT/initramfs-factory.ubi := append-image-stage initramfs-recovery.itb | ubinize-kernel
-endif
+  SUPPORTED_DEVICES += xiaomi,redmi-router-ax6000-ubootmod
 endef'''
 
 # 匹配从 define ... 到对应的 endef（非贪婪，DOTALL）
 pattern = re.compile(
-    r"define Device/xiaomi_redmi-router-ax6000-ubootmod\n.*?\nendef",
+    r"define Device/xiaomi_redmi-router-ax6000-mtkuboot\n.*?\nendef",
     re.DOTALL,
 )
 matches = pattern.findall(content)
@@ -116,5 +111,12 @@ with open(mk_path, "w", encoding="utf-8") as f:
     f.write(content)
 print("==> 已改写 filogic.mk 设备块")
 PY_EOF
+
+echo "-------------------"
+cat $DTS_PATH
+
+cat $MK_PATH
+
+echo "-------------------"
 
 echo "==> 迁移完成。接下来正常 make 即可，产物为 sysupgrade.bin（squashfs+ubi）。"
