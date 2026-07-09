@@ -21,7 +21,7 @@ set -euo pipefail
 DTS_PATH="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts"
 MK_PATH="target/linux/mediatek/image/filogic.mk"
 
-echo "==> OpenWrt root: $OPENWRT_ROOT"
+echo "==> OpenWrt root: $(pwd)"
 
 # ---------------------------------------------------------------------------
 # 1) 写入迁移后的 DTS（采用 padavanonly 的分区结构）
