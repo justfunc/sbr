@@ -51,9 +51,21 @@ cat > "$DTS_PATH" <<'DTS_EOF'
 
 &partitions {
 	partition@580000 {
-		label = "ubi";
-		reg = <0x580000 0x6e80000>;
-	};
+		label = "crash";
+        reg = <0x580000 0x40000>;
+        read-only;
+    };
+
+    partition@5c0000 {
+        label = "crash_log";
+        reg = <0x5c0000 0x40000>;
+        read-only;
+    };
+
+    partition@600000 {
+        label = "ubi";
+        reg = <0x600000 0x6e00000>;
+    };
 };
 DTS_EOF
 echo "==> 已写入迁移后 DTS: $DTS_PATH"
@@ -88,7 +100,7 @@ new_block = '''define Device/xiaomi_redmi-router-ax6000-mtkuboot
   UBINIZE_OPTS := -E 5
   BLOCKSIZE := 128k
   PAGESIZE := 2048
-  IMAGE_SIZE := 113152k
+  IMAGE_SIZE := 112640k
   KERNEL_IN_UBI := 1
   IMAGES += factory.bin
   IMAGE/factory.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
