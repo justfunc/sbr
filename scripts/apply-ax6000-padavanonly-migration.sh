@@ -17,58 +17,9 @@
 #
 set -euo pipefail
 
-# 以脚本所在仓库的根为基准（如果你的 OpenWrt 源码在子目录，改这里）
-DTS_PATH="target/linux/mediatek/dts-ext/mt7986a-xiaomi-redmi-router-ax6000-mtkuboot.dts"
 MK_PATH="target/linux/mediatek/image/filogic-ext.mk"
 
 echo "==> OpenWrt root: $(pwd)"
-
-# ---------------------------------------------------------------------------
-# 1) 写入迁移后的 DTS（采用 padavanonly 的分区结构）
-# ---------------------------------------------------------------------------
-if [ ! -f "$DTS_PATH" ]; then
-    echo "ERROR: 找不到 $DTS_PATH" >&2
-    echo "       请确认在 OpenWrt 源码根目录运行，或修改 OPENWRT_ROOT 环境变量。" >&2
-    exit 1
-fi
-
-cat > "$DTS_PATH" <<'DTS_EOF'
-// SPDX-License-Identifier: (GPL-2.0 OR MIT)
-
-/dts-v1/;
-#include "../dts/mt7986a-xiaomi-redmi-router-ax6000.dtsi"
-
-/ {
-	model = "Xiaomi Redmi Router AX6000 (MTK U-Boot layout)";
-	compatible = "xiaomi,redmi-router-ax6000-ubootmod", "mediatek,mt7986a";
-};
-
-&spi_nand_flash {
-	mediatek,nmbm;
-	mediatek,bmt-max-ratio = <1>;
-	mediatek,bmt-max-reserved-blocks = <64>;
-};
-
-&partitions {
-	partition@580000 {
-		label = "crash";
-        reg = <0x580000 0x40000>;
-        read-only;
-    };
-
-    partition@5c0000 {
-        label = "crash_log";
-        reg = <0x5c0000 0x40000>;
-        read-only;
-    };
-
-    partition@600000 {
-        label = "ubi";
-        reg = <0x600000 0x6e00000>;
-    };
-};
-DTS_EOF
-echo "==> 已写入迁移后 DTS: $DTS_PATH"
 
 # ---------------------------------------------------------------------------
 # 2) 改写 filogic.mk 里的 xiaomi_redmi-router-ax6000-ubootmod 设备块
@@ -127,7 +78,6 @@ print("==> 已改写 filogic.mk 设备块")
 PY_EOF
 
 echo "-------------------"
-cat $DTS_PATH
 
 cat $MK_PATH
 

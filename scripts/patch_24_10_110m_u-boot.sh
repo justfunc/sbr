@@ -1,61 +1,7 @@
 #!/bin/bash
 
 # 定义文件路径
-DTS_FILE="target/linux/mediatek/dts/mt7986a-xiaomi-redmi-router-ax6000-ubootmod.dts"
 MAKEFILE="target/linux/mediatek/image/filogic.mk"
-
-echo "开始修补 OpenWrt 24.10 源码以适配 hanwckf 110M 大分区布局..."
-
-# ==========================================
-# 修改 DTS 文件
-# ==========================================
-if [ -f "$DTS_FILE" ]; then
-    echo "[-] 正在重写 DTS: $DTS_FILE"
-    
-    # 2. 【核心改变】绝对不碰原文件的一行代码，不删任何括号！
-    # 直接在文件末尾追加一个强力的重写块：先命令编译器删除官方的3个旧分区，再注入我们的 UBI 大分区。
-    cat << 'EOF' > "$DTS_FILE"
-// SPDX-License-Identifier: (GPL-2.0 OR MIT)
-
-/dts-v1/;
-#include "mt7986a-xiaomi-redmi-router-ax6000.dtsi"
-
-/ {
-	model = "Xiaomi Redmi Router AX6000 (OpenWrt U-Boot layout)";
-	compatible = "xiaomi,redmi-router-ax6000-ubootmod", "mediatek,mt7986a";
-};
-
-&spi_nand_flash {
-  mediatek,nmbm;
-  mediatek,bmt-max-ratio = <1>;
-  mediatek,bmt-max-reserved-blocks = <64>;
-};
-
-&partitions {
-	partition@580000 {
-		label = "crash";
-      reg = <0x580000 0x40000>;
-      read-only;
-    };
-
-    partition@5c0000 {
-      label = "crash_log";
-      reg = <0x5c0000 0x40000>;
-      read-only;
-    };
-
-    partition@600000 {
-      label = "ubi";
-      reg = <0x600000 0x6e00000>;
-    };
-};
-EOF
-
-    echo "[✓] DTS 物理覆盖修改完成。"
-else
-    echo "[x] 错误: 未找到 DTS 文件 $DTS_FILE"
-    exit 1
-fi
 
 # ==========================================
 # 修改 Makefile (filogic.mk)
@@ -92,6 +38,7 @@ ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
   ARTIFACT/initramfs-factory.ubi := append-image-stage initramfs-recovery.itb | ubinize-kernel
 endif
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+  SUPPORTED_DEVICES += xiaomi,redmi-router-ax6000-mtkuboot
 endef
 TARGET_DEVICES += xiaomi_redmi-router-ax6000-ubootmod
 EOF
@@ -105,17 +52,6 @@ fi
 # ==========================================
 # 打印修改结果日志
 # ==========================================
-echo ""
-echo "=========================================================="
-echo "                   修改结果核对日志                        "
-echo "=========================================================="
-echo ""
-echo "👉 [DTS 文件] 当前的分区表配置 (&partitions):"
-echo "----------------------------------------------------------"
-# 打印 DTS 中 &partitions 开始到结束的代码块
-cat "$DTS_FILE"
-echo "----------------------------------------------------------"
-
 echo ""
 echo "👉 [Makefile 文件] 编译限制与打包配置 (Device Block):"
 echo "----------------------------------------------------------"
