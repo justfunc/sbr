@@ -33,9 +33,21 @@ if [ -f "$DTS_FILE" ]; then
 
 &partitions {
 	partition@580000 {
-    label = "ubi";
-		reg = <0x580000 0x6e80000>;
-  };
+		label = "crash";
+      reg = <0x580000 0x40000>;
+      read-only;
+    };
+
+    partition@5c0000 {
+      label = "crash_log";
+      reg = <0x5c0000 0x40000>;
+      read-only;
+    };
+
+    partition@600000 {
+      label = "ubi";
+      reg = <0x600000 0x6e00000>;
+    };
 };
 EOF
 
