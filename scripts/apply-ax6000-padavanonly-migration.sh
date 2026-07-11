@@ -57,6 +57,7 @@ new_block = '''define Device/xiaomi_redmi-router-ax6000-mtkuboot
   IMAGE/factory.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   SUPPORTED_DEVICES += xiaomi,redmi-router-ax6000-ubootmod
+  BOARD_NAME := xiaomi,redmi-router-ax6000-ubootmod
 endef'''
 
 # 匹配从 define ... 到对应的 endef（非贪婪，DOTALL）

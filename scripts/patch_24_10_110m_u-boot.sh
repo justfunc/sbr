@@ -39,6 +39,7 @@ define Device/xiaomi_redmi-router-ax6000-ubootmod
   IMAGE/factory.bin := append-ubi | check-size $$$$(IMAGE_SIZE)
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   SUPPORTED_DEVICES += xiaomi,redmi-router-ax6000-mtkuboot
+  BOARD_NAME := xiaomi,redmi-router-ax6000-ubootmod
 endef
 TARGET_DEVICES += xiaomi_redmi-router-ax6000-ubootmod
 EOF
