@@ -114,6 +114,7 @@ jobs:
           free -h
 
       - name: Clone Code
+        id: ck_upstream
         run: |
           git clone --depth 1 --single-branch --filter=blob:none -b $REPO_BRANCH $REPO_URL immortalwrt
 
@@ -126,6 +127,11 @@ jobs:
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
             sed -i '/.cn\//d; /tencent/d; /aliyun/d' "$PROJECT_MIRRORS_FILE"
           fi
+
+          OSHORT_SHA=$(git rev-parse --short HEAD)
+          OCOMMIT_MSG=$(git log -5 --pretty=%s)
+          echo "OSHORT_SHA=$OSHORT_SHA" >> $GITHUB_OUTPUT
+          echo "OCOMMIT_MSG=$OCOMMIT_MSG" >> $GITHUB_OUTPUT
 
       - name: Custom Packages
         working-directory: immortalwrt
@@ -232,6 +238,8 @@ jobs:
           echo "- 源码分支: ${{ env.REPO_BRANCH }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建时间: ${{ env.WRT_DATE }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建版本: ${{ steps.commitversionmsg.outputs.T_TITLE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 上游版本：${{ steps.ck_upstream.outputs.OSHORT_SHA }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 上游更新：${{ steps.ck_upstream.outputs.OCOMMIT_MSG }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- 运行编号: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           if [ -f immortalwrt/build.log ]; then
