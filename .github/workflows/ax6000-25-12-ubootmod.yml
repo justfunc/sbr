@@ -246,3 +246,11 @@ jobs:
           if [ -f immortalwrt/build.log ]; then
             echo "- 编译日志行数: $(wc -l < immortalwrt/build.log)" >> $GITHUB_STEP_SUMMARY
           fi
+          curl -X "POST" "https://bark.getc.cf/JEkEexrqPCDxVwVeeGkY2M" \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            -d $'{
+            "title":"Github Actions 构建通知"
+            "body": "${{REPO_SOURCE}}-${{REPO_BRANCH}}-${{job.status}}",
+            "sound": "minuet",
+            "icon": "https://img.icons8.com/?size=100&id=fmFqQmR0UdsR&format=png&color=000000"
+          }'
