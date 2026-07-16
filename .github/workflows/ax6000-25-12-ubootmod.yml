@@ -33,7 +33,7 @@ on:
         description: "是否开启 WRT 测试"
       PATCH_110M:
         required: false
-        default: false
+        default: true
         type: boolean
         description: "是否开启 110M U-Boot 补丁"
 
@@ -68,7 +68,7 @@ jobs:
         id: commitversionmsg
         run: |
           SHORT_SHA=$(git rev-parse --short HEAD)
-          COMMIT_MSG=$(git log -1 --pretty=%s)
+          COMMIT_MSG=$(git log -5 --pretty=%s)
           TARGET_TITLE="[${SHORT_SHA}] - ${COMMIT_MSG}"
           echo "T_TITLE=$TARGET_TITLE" >> $GITHUB_OUTPUT
           echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
@@ -237,7 +237,8 @@ jobs:
           echo "- 构建源码: ${{ env.REPO_URL }}" >> $GITHUB_STEP_SUMMARY
           echo "- 源码分支: ${{ env.REPO_BRANCH }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建时间: ${{ env.WRT_DATE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 构建版本: ${{ steps.commitversionmsg.outputs.T_TITLE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建版本: ${{ steps.commitversionmsg.outputs.SHORT_SHA }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 构建信息: ${{ steps.commitversionmsg.outputs.COMMIT_MSG }}" >> $GITHUB_STEP_SUMMARY
           echo "- 上游版本：${{ steps.ck_upstream.outputs.OSHORT_SHA }}" >> $GITHUB_STEP_SUMMARY
           echo "- 上游更新：${{ steps.ck_upstream.outputs.OCOMMIT_MSG }}" >> $GITHUB_STEP_SUMMARY
           echo "- 构建状态: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
