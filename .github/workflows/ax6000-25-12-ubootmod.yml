@@ -49,7 +49,7 @@ env:
 jobs:
   build:
     name: ImmortalWrt-25-12-6-12-Redmi-AX6000 Build ${{ github.sha }}
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     steps:
 
       - name: 输入参数
